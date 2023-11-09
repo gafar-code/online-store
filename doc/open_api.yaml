@@ -306,6 +306,56 @@ paths:
                     example: "Fetch Product Failed"   
 
 
+  /product/{id}:
+    get:
+      tags:
+        - "product"
+      operationId: GetProductDetail
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          description: "Product ID"
+          required: true
+          schema:
+            type: integer
+            example: 1
+
+      responses:
+        "200":
+          description: Fetch Product Success
+          content:
+            "application/json":
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 201
+                  message:
+                    type: string
+                    example: "Fetch Product Success"
+                  data:
+                    $ref: "#/components/schemas/Product"
+                          
+        "500":
+          description: Login Failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 500
+                  message:
+                    type: string
+                    example: "Fetch Product Failed"   
+
+
   /cart:
     post:
       tags:

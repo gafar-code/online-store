@@ -41,7 +41,7 @@ func TestCreateCustomer(t *testing.T) {
 
 func TestGetCustomer(t *testing.T) {
 	cust1 := createRandomCustomer(t)
-	cust2, err := testQueries.GetCustomer(context.Background(), cust1.ID)
+	cust2, err := testQueries.GetCustomerByEmail(context.Background(), cust1.Email)
 
 	require.NoError(t, err)
 	require.NotEmpty(t, cust2)

@@ -27,6 +27,11 @@ sqlc:
 test:
 	go test -v -cover ./...
 
+oapi:
+	oapi-codegen -generate types -o ./api/types.gen.go -package api ./doc/open_api.yaml
+	oapi-codegen -generate gin-server -o ./api/server.gen.go -package api ./doc/open_api.yaml
+
+
 .PHONY:
 	postgres
 	createdb
@@ -37,3 +42,4 @@ test:
 	reset
 	sqlc
 	test
+	oapi
