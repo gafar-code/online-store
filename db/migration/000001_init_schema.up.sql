@@ -4,7 +4,6 @@ CREATE TABLE "customers" (
   "email" varchar NOT NULL,
   "password" varchar NOT NULL,
   "address" varchar NOT NULL,
-  "token" varchar NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );
 

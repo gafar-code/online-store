@@ -5,10 +5,9 @@ INSERT INTO
         name,
         email,
         password,
-        address,
-        token
+        address
     )
-VALUES ($1, $2, $3, $4, $5)
+VALUES ($1, $2, $3, $4)
 RETURNING *;
 
 -- name: GetCustomerByEmail :one
