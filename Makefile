@@ -17,8 +17,7 @@ migratedown:
 	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/store_db?sslmode=disable" -verbose down
 
 reset:
-	docker exec -it postgres dropdb store_db
-	docker exec -it postgres createdb --username=root --owner=root store_db
+	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/store_db?sslmode=disable" -verbose down
 	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/store_db?sslmode=disable" -verbose up
 
 sqlc:
@@ -30,6 +29,9 @@ test:
 oapi:
 	oapi-codegen -generate types -o ./api/types.gen.go -package api ./doc/open_api.yaml
 	oapi-codegen -generate gin-server -o ./api/server.gen.go -package api ./doc/open_api.yaml
+
+server:
+	go run main.go
 
 
 .PHONY:
@@ -43,3 +45,4 @@ oapi:
 	sqlc
 	test
 	oapi
+	server

@@ -51,7 +51,7 @@ func errorHandler(c *gin.Context, err error, code int) {
 }
 
 func NewServer(config util.Config, q *db.Queries) (server *Server, err error) {
-	tokenMaker, err = token.NewJWTMaker(config.TokenSymmetricKey)
+	tokenMaker, err = token.NewPasetoMaker(config.TokenSymmetricKey)
 	if err != nil {
 		return nil, fmt.Errorf("cannot create token maker: %w", err)
 	}
@@ -78,8 +78,12 @@ func NewServer(config util.Config, q *db.Queries) (server *Server, err error) {
 	}
 
 	baseUrl := "/api/v1"
+	wrapServer := &ServerWraper{
+		server: server,
+	}
 
-	RegisterHandlersWithOptions(router, server, GinServerOptions{
+	// TODO: Change wrapServer to server
+	RegisterHandlersWithOptions(router, wrapServer, GinServerOptions{
 		BaseURL:      baseUrl,
 		Middlewares:  middleware,
 		ErrorHandler: errorHandler,

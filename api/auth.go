@@ -17,7 +17,7 @@ type loginReq struct {
 
 type registerReq struct {
 	Name     string `json:"name" binding:"required"`
-	Address  string `json:"address" binding:"required,oneof=L P"`
+	Address  string `json:"address" binding:"required"`
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required"`
 }
@@ -26,6 +26,7 @@ type customerResponse struct {
 	ID        int64     `json:"id"`
 	Name      string    `json:"name"`
 	Email     string    `json:"email"`
+	Address   string    `json:"address"`
 	Token     string    `json:"token"`
 	CreatedAt time.Time `json:"created_at"`
 }
@@ -121,15 +122,7 @@ func (server *Server) Register(c *gin.Context) {
 
 	}
 
-	arg := db.CreateCustomerParams{
-		Name:     req.Name,
-		Email:    req.Email,
-		Password: string(hashedPassword),
-		Address:  req.Address,
-	}
-
-	customer, err = server.q.CreateCustomer(c, arg)
-
+	token, err := tokenMaker.CreateToken(customer.Email, tokenDuration)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, ResponseErr{
 			Code:    http.StatusInternalServerError,
@@ -138,7 +131,16 @@ func (server *Server) Register(c *gin.Context) {
 		return
 	}
 
-	token, err := tokenMaker.CreateToken(customer.Email, tokenDuration)
+	arg := db.CreateCustomerParams{
+		Name:     req.Name,
+		Email:    req.Email,
+		Password: string(hashedPassword),
+		Address:  req.Address,
+		Token:    token,
+	}
+
+	customer, err = server.q.CreateCustomer(c, arg)
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, ResponseErr{
 			Code:    http.StatusInternalServerError,
@@ -154,6 +156,7 @@ func (server *Server) Register(c *gin.Context) {
 			ID:        customer.ID,
 			Name:      customer.Name,
 			Email:     customer.Email,
+			Address:   customer.Address,
 			Token:     token,
 			CreatedAt: customer.CreatedAt,
 		},
