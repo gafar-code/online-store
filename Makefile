@@ -21,8 +21,15 @@ reset:
 	docker exec -it postgres createdb --username=root --owner=root store_db
 	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/store_db?sslmode=disable" -verbose up
 
+sqlc:
+	sqlc generate
+
 .PHONY:
 	postgres
 	createdb
 	dropdb
 	migratecreate
+	migrateup
+	migratedown
+	reset
+	sqlc

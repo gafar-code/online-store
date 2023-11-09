@@ -48,13 +48,15 @@ CREATE TABLE "orders" (
 
 CREATE TABLE "order_items" (
   "id" bigserial PRIMARY KEY,
-  "cart_id" bigint NOT NULL,
+  "product_id" bigint NOT NULL,
+  "qty" bigint NOT NULL,
   "order_id" bigint NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );
 
 CREATE TABLE "transactions" (
   "id" bigserial PRIMARY KEY,
+  "customer_id" bigint NOT NULL,
   "status" varchar NOT NULL DEFAULT 'PENDING',
   "issued_at" timestamptz NOT NULL DEFAULT (now()),
   "order_id" bigint NOT NULL,
@@ -87,8 +89,10 @@ ALTER TABLE "orders" ADD FOREIGN KEY ("customer_id") REFERENCES "customers" ("id
 
 ALTER TABLE "orders" ADD FOREIGN KEY ("virtual_account_id") REFERENCES "virtual_accounts" ("id");
 
-ALTER TABLE "order_items" ADD FOREIGN KEY ("cart_id") REFERENCES "carts" ("id");
+ALTER TABLE "order_items" ADD FOREIGN KEY ("product_id") REFERENCES "products" ("id");
 
 ALTER TABLE "order_items" ADD FOREIGN KEY ("order_id") REFERENCES "orders" ("id");
+
+ALTER TABLE "transactions" ADD FOREIGN KEY ("customer_id") REFERENCES "customers" ("id");
 
 ALTER TABLE "transactions" ADD FOREIGN KEY ("order_id") REFERENCES "orders" ("id");
