@@ -27,8 +27,10 @@ type Customer struct {
 }
 
 type Order struct {
-	ID               int64     `json:"id"`
-	CustomerID       int64     `json:"customer_id"`
+	ID         int64 `json:"id"`
+	CustomerID int64 `json:"customer_id"`
+	// WAITING_PAYMENT/PAID/CANCEL
+	Status           string    `json:"status"`
 	VirtualAccountID int64     `json:"virtual_account_id"`
 	CreatedAt        time.Time `json:"created_at"`
 }
@@ -60,7 +62,7 @@ type ProductCategory struct {
 type Transaction struct {
 	ID         int64 `json:"id"`
 	CustomerID int64 `json:"customer_id"`
-	// WAITING_PAYMENT/PAID/IN_DELIVERY/DELIVERED/SUCCESS
+	// IN_DELIVERY/DELIVERED/SUCCESS
 	Status    string    `json:"status"`
 	IssuedAt  time.Time `json:"issued_at"`
 	OrderID   int64     `json:"order_id"`

@@ -12,6 +12,7 @@ func createRandomOrder(t *testing.T) Order {
 	va := createRandomVirtualAccount(t)
 
 	arg := CreateOrderParams{
+		Status:           "WAITING_PAYMENT",
 		CustomerID:       cust.ID,
 		VirtualAccountID: va.ID,
 	}

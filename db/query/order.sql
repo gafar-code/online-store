@@ -3,9 +3,10 @@
 INSERT INTO
     orders (
         customer_id,
+        status,
         virtual_account_id
     )
-VALUES ($1, $2)
+VALUES ($1, $2, $3)
 RETURNING *;
 
 -- name: ListOrderByCustomerId :many

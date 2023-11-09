@@ -43,6 +43,7 @@ CREATE TABLE "carts" (
 CREATE TABLE "orders" (
   "id" bigserial PRIMARY KEY,
   "customer_id" bigint NOT NULL,
+  "status" varchar NOT NULL,
   "virtual_account_id" bigint NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );
@@ -78,7 +79,9 @@ CREATE INDEX ON "orders" ("id");
 
 CREATE INDEX ON "transactions" ("id");
 
-COMMENT ON COLUMN "transactions"."status" IS 'WAITING_PAYMENT/PAID/IN_DELIVERY/DELIVERED/SUCCESS';
+COMMENT ON COLUMN "orders"."status" IS 'WAITING_PAYMENT/PAID/CANCEL';
+
+COMMENT ON COLUMN "transactions"."status" IS 'IN_DELIVERY/DELIVERED/SUCCESS';
 
 ALTER TABLE "products" ADD FOREIGN KEY ("category_id") REFERENCES "product_categories" ("id");
 

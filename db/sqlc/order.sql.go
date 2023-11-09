@@ -14,23 +14,26 @@ const createOrder = `-- name: CreateOrder :one
 INSERT INTO
     orders (
         customer_id,
+        status,
         virtual_account_id
     )
-VALUES ($1, $2)
-RETURNING id, customer_id, virtual_account_id, created_at
+VALUES ($1, $2, $3)
+RETURNING id, customer_id, status, virtual_account_id, created_at
 `
 
 type CreateOrderParams struct {
-	CustomerID       int64 `json:"customer_id"`
-	VirtualAccountID int64 `json:"virtual_account_id"`
+	CustomerID       int64  `json:"customer_id"`
+	Status           string `json:"status"`
+	VirtualAccountID int64  `json:"virtual_account_id"`
 }
 
 func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) (Order, error) {
-	row := q.db.QueryRowContext(ctx, createOrder, arg.CustomerID, arg.VirtualAccountID)
+	row := q.db.QueryRowContext(ctx, createOrder, arg.CustomerID, arg.Status, arg.VirtualAccountID)
 	var i Order
 	err := row.Scan(
 		&i.ID,
 		&i.CustomerID,
+		&i.Status,
 		&i.VirtualAccountID,
 		&i.CreatedAt,
 	)
@@ -39,7 +42,7 @@ func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) (Order
 
 const listOrderByCustomerId = `-- name: ListOrderByCustomerId :many
 
-SELECT id, customer_id, virtual_account_id, created_at FROM orders WHERE customer_id = $1 LIMIT $2 OFFSET $3
+SELECT id, customer_id, status, virtual_account_id, created_at FROM orders WHERE customer_id = $1 LIMIT $2 OFFSET $3
 `
 
 type ListOrderByCustomerIdParams struct {
@@ -60,6 +63,7 @@ func (q *Queries) ListOrderByCustomerId(ctx context.Context, arg ListOrderByCust
 		if err := rows.Scan(
 			&i.ID,
 			&i.CustomerID,
+			&i.Status,
 			&i.VirtualAccountID,
 			&i.CreatedAt,
 		); err != nil {

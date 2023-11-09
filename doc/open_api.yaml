@@ -1,0 +1,708 @@
+openapi: 3.0.0
+
+info:
+  title: Online Store
+  description: Documentation of the Online Store API build in Go-lang
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/api/v1/
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: PASETO
+  schemas:
+    Customer:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          example: 1
+        name:
+          type: string
+          example: "Gafar riskiyanto"
+        email:
+          type: string
+          format: email
+          example: "gafar@store.com"
+        address:
+          type: string
+          example: "Jln. Pahlawan No. 1, Sekaran, Sekaran, Lamongan"
+        token:
+          type: string
+          example: "v2.local.Shkfbsfsbfjsfsfbsjhfbsfhsbfjhb"
+        created_at:
+          type: string
+          format: date-time
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          example: 1
+        category_id:
+          type: integer
+          format: int32
+          example: 2
+        name:
+          type: string
+          example: "Jam Tangan Pria - Alexander Christy"
+        image_url:
+          type: string
+          example: "https://images_url.jpg"
+        description:
+          type: string
+          example: "Jam tangan keren, Bahan titanium berlapis emas 99k"
+        price:
+          type: integer
+          example: 100000
+        qty:
+          type: integer
+          example: 20
+        created_at:
+          type: string
+          format: date-time
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        bank_name:
+          type: string
+          example: "Virtual Account BCA"
+        rekening_number:
+          type: integer
+          example: 6537538
+        amount:
+          type: integer
+          example: 2000000
+        description:
+          type: string
+          example: "<b><b/>"
+        status:
+          type: string
+          example: "WAITING_PAYMENT"
+        issued_at:
+          type: string
+          format: date-time
+        expired_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+    Transaction:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 23
+        status:
+          type: string
+          example: "PENDING"
+        issued_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        products:
+          type: array
+          items:
+            $ref: "#/components/schemas/Product"
+
+paths:
+  /auth/register:
+    post:
+      tags:
+        - "auth"
+      operationId: Register
+      requestBody:
+        content:
+          "application/json":
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Gafar
+                address:
+                  type: string
+                  example: "Jln. Pahlawan NO.1, Lamongan"
+                email:
+                  type: string
+                  format: email
+                  example: "gafar@store.com"
+                password:
+                  type: string
+                  format: password
+                  example: "12345678"
+              required:
+                - email
+                - password
+      responses:
+        "201":
+          description: Register Success
+          content:
+            "application/json":
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 201
+                  message:
+                    type: string
+                    example: "Register Success"
+                  data:
+                    $ref: "#/components/schemas/Customer"
+        "500":
+          description: Register Failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 500
+                  message:
+                    type: string
+                    example: "Register Failed"
+
+
+  /auth/login:
+    post:
+      tags:
+        - "auth"
+      operationId: Login
+      requestBody:
+        content:
+          "application/json":
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "gafar@store.com"
+                password:
+                  type: string
+                  format: password
+                  example: "12345678"
+              required:
+                - email
+                - password
+      responses:
+        "200":
+          description: Login Success
+          content:
+            "application/json":
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 200
+                  message:
+                    type: string
+                    example: "Login Success"
+                  data:
+                    $ref: "#/components/schemas/Customer"
+        "500":
+          description: Login Failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 500
+                  message:
+                    type: string
+                    example: "Login Failed"
+
+
+  /product:
+    get:
+      tags:
+        - "product"
+      operationId: GetProductByCategoryId
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          description: "The page number you want to retrieve, starting from page 1"
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - in: query
+          name: size
+          description: "Number of items per page"
+          required: true
+          schema:
+            type: integer
+            example: 1 
+        - in: query
+          name: category_id
+          description: "View product list by product category"
+          schema:
+            type: integer
+
+      responses:
+        "200":
+          description: Fetch Product Success
+          content:
+            "application/json":
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 201
+                  message:
+                    type: string
+                    example: "Fetch Product Success"
+                  data:
+                    type: object
+                    properties:
+                      page:
+                        type: integer
+                        example: 1
+                      size:
+                        type: integer
+                        example: 10
+                      items:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Product"
+        "500":
+          description: Login Failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 500
+                  message:
+                    type: string
+                    example: "Fetch Product Failed"   
+
+
+  /cart:
+    post:
+      tags:
+        - "cart"
+      operationId: AddToCart
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          "application/json":
+            schema:
+              type: object
+              properties:
+                product_id:
+                  type: integer
+                  example: 10
+                qty:
+                  type: integer
+                  example: 1
+      responses:
+        "201":
+          description: Add Product to Shopping Cart Success
+          content:
+            "application/json":
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 201
+                  message:
+                    type: string
+                    example: "The product has been added to the cart"
+        "500":
+          description: Login Failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 500
+                  message:
+                    type: string
+                    example: "Add Cart Failed"
+    get:
+      tags:
+        - "cart"
+      operationId: GetCart
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          description: "The page number you want to retrieve, starting from page 1"
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - in: query
+          name: size
+          description: "Number of items per page"
+          required: true
+          schema:
+            type: integer
+            example: 1 
+      responses:
+        "200":
+          description: Get Shopping Cart
+          content:
+            "application/json":
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 200
+                  message:
+                    type: string
+                    example: "Get Shopping Cart Success"
+                  data:
+                    type: object
+                    properties:
+                      page:
+                        type: integer
+                        example: 1
+                      size:
+                        type: integer
+                        example: 10
+                      items:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Product"
+                    
+        "500":
+          description: Login Failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 500
+                  message:
+                    type: string
+                    example: "Get Shopping Cart Failed"
+    delete:
+      tags:
+        - "cart"
+      operationId: DeleteProductFromCart
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: cart_id
+          required: true
+          schema:
+            type: integer
+            example: 1
+
+      responses:
+        "204":
+          description: Delete Cart Succes
+          content:
+            "application/json":
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 204
+                  message:
+                    type: string
+                    example: "Delete All Cart Succesfully"
+        "500":
+          description: Delete All Cart Succes Failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 500
+                  message:
+                    type: string
+                    example: "Delete All Cart Failed"
+
+
+  /cart/delete-all:
+    delete:
+      tags:
+        - "cart"
+      operationId: DeleteAllCart
+      security:
+        - BearerAuth: []
+      responses:
+        "204":
+          description: Delete All Cart Succes
+          content:
+            "application/json":
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 204
+                  message:
+                    type: string
+                    example: "Delete All Cart Succesfully"
+        "500":
+          description: Delete All Cart Failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 500
+                  message:
+                    type: string
+                    example: "Delete All Cart Failed"
+
+
+  /order:
+    post:
+      tags:
+        - "order"
+      operationId: AddOrder
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          "application/json":
+            schema:
+              type: object
+              properties:
+                virtual_account_id:
+                  type: integer
+                  example: 1
+                products:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      product_id:
+                        type: integer
+                        example: 3
+                      qty:
+                        type: integer
+                        example: 25
+                      
+              required:
+                - customer_id
+                - virtual_account_id
+      responses:
+        "201":
+          description: Checkout Success
+          content:
+            "application/json":
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 201
+                  message:
+                    type: string
+                    example: "Checkout Success"
+                  data:
+                    $ref: "#/components/schemas/Order"
+
+                     
+        "500":
+          description: Checkout Failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 500
+                  message:
+                    type: string
+                    example: "Checkout Failed" 
+
+
+  /order/{id}:
+      put:
+        tags:
+          - "order"
+        operationId: UpdatePayment
+        security:
+          - BearerAuth: []
+        parameters:
+        - in: path
+          name: id
+          description: "Order ID that you want to UpdatePayment"
+          required: true
+          schema:
+            type: integer
+            example: 1
+        requestBody:
+          content:
+            "application/json":
+              schema:
+                type: object
+                properties:
+                  virtual_account_id:
+                    type: integer
+                    example: 1
+                  name:
+                    type: string
+                    example: "Gafar"
+                  rekening_number:
+                    type: integer
+                    example: 6537538
+                  image_url:
+                    type: string
+                    example: "https://image.jpg"
+                        
+                required:
+                  - customer_id
+                  - virtual_account_id
+        responses:
+          "200":
+            description: Submit Success
+            content:
+              "application/json":
+                schema:
+                  type: object
+                  properties:
+                    code:
+                      type: integer
+                      format: int32
+                      example: 200
+                    message:
+                      type: string
+                      example: "Submit Success"
+                    data:
+                      $ref: "#/components/schemas/Order"
+
+                      
+          "500":
+            description: Checkout Failed
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    code:
+                      type: integer
+                      format: int32
+                      example: 500
+                    message:
+                      type: string
+                      example: "Checkout Failed" 
+
+
+  /transaction:
+    get:
+      tags:
+        - "transaction"
+      operationId: ListOrders
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          description: "The page number you want to retrieve, starting from page 1"
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - in: query
+          name: size
+          description: "Number of items per page"
+          required: true
+          schema:
+            type: integer
+            example: 1 
+
+      responses:
+        "200":
+          description: Fetch Order Success
+          content:
+            "application/json":
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 200
+                  message:
+                    type: string
+                    example: "Fetch Order Success"
+                  data:
+                    type: object
+                    properties:
+                      page:
+                        type: integer
+                        example: 1
+                      size:
+                        type: integer
+                        example: 10
+                      items:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Transaction"
+        "500":
+          description: Login Failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 500
+                  message:
+                    type: string
+                    example: "Fetch Product Failed"
+
+
