@@ -7,7 +7,11 @@ RETURNING *;
 
 -- name: GetCartByCustomerId :many
 
-SELECT * FROM carts WHERE customer_id = $1 LIMIT 1;
+SELECT * FROM carts WHERE customer_id = $1 LIMIT $2 OFFSET $3;
+
+-- name: GetCart :one
+
+SELECT * FROM carts WHERE id = $1 LIMIT 1;
 
 -- name: UpdateCart :one
 

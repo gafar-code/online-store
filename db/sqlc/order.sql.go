@@ -39,16 +39,17 @@ func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) (Order
 
 const listOrderByCustomerId = `-- name: ListOrderByCustomerId :many
 
-SELECT id, customer_id, virtual_account_id, created_at FROM orders ORDER BY customer_id LIMIT $1 OFFSET $2
+SELECT id, customer_id, virtual_account_id, created_at FROM orders WHERE customer_id = $1 LIMIT $2 OFFSET $3
 `
 
 type ListOrderByCustomerIdParams struct {
-	Limit  int32 `json:"limit"`
-	Offset int32 `json:"offset"`
+	CustomerID int64 `json:"customer_id"`
+	Limit      int32 `json:"limit"`
+	Offset     int32 `json:"offset"`
 }
 
 func (q *Queries) ListOrderByCustomerId(ctx context.Context, arg ListOrderByCustomerIdParams) ([]Order, error) {
-	rows, err := q.db.QueryContext(ctx, listOrderByCustomerId, arg.Limit, arg.Offset)
+	rows, err := q.db.QueryContext(ctx, listOrderByCustomerId, arg.CustomerID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}

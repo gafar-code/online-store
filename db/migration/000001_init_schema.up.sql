@@ -28,6 +28,7 @@ CREATE TABLE "products" (
   "image_url" varchar NOT NULL,
   "description" varchar NOT NULL,
   "price" bigint NOT NULL,
+  "qty" bigint NOT NULL DEFAULT '1',
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );
 
@@ -35,7 +36,7 @@ CREATE TABLE "carts" (
   "id" bigserial PRIMARY KEY,
   "customer_id" bigint NOT NULL,
   "product_id" bigint NOT NULL,
-  "qty" bigint NOT NULL,
+  "qty" bigint NOT NULL DEFAULT '1',
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );
 
@@ -49,7 +50,7 @@ CREATE TABLE "orders" (
 CREATE TABLE "order_items" (
   "id" bigserial PRIMARY KEY,
   "product_id" bigint NOT NULL,
-  "qty" bigint NOT NULL,
+  "qty" bigint NOT NULL DEFAULT '1',
   "order_id" bigint NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );

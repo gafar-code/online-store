@@ -17,10 +17,11 @@ INSERT INTO
         name,
         image_url,
         description,
+        qty,
         price
     )
-VALUES ($1, $2, $3, $4, $5)
-RETURNING id, category_id, name, image_url, description, price, created_at
+VALUES ($1, $2, $3, $4, $5, $6)
+RETURNING id, category_id, name, image_url, description, price, qty, created_at
 `
 
 type CreateProductParams struct {
@@ -28,6 +29,7 @@ type CreateProductParams struct {
 	Name        string `json:"name"`
 	ImageUrl    string `json:"image_url"`
 	Description string `json:"description"`
+	Qty         int64  `json:"qty"`
 	Price       int64  `json:"price"`
 }
 
@@ -37,6 +39,7 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (P
 		arg.Name,
 		arg.ImageUrl,
 		arg.Description,
+		arg.Qty,
 		arg.Price,
 	)
 	var i Product
@@ -47,6 +50,7 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (P
 		&i.ImageUrl,
 		&i.Description,
 		&i.Price,
+		&i.Qty,
 		&i.CreatedAt,
 	)
 	return i, err
@@ -54,7 +58,7 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (P
 
 const getProduct = `-- name: GetProduct :one
 
-SELECT id, category_id, name, image_url, description, price, created_at FROM products WHERE id = $1 LIMIT 1
+SELECT id, category_id, name, image_url, description, price, qty, created_at FROM products WHERE id = $1 LIMIT 1
 `
 
 func (q *Queries) GetProduct(ctx context.Context, id int64) (Product, error) {
@@ -67,6 +71,7 @@ func (q *Queries) GetProduct(ctx context.Context, id int64) (Product, error) {
 		&i.ImageUrl,
 		&i.Description,
 		&i.Price,
+		&i.Qty,
 		&i.CreatedAt,
 	)
 	return i, err
@@ -74,11 +79,17 @@ func (q *Queries) GetProduct(ctx context.Context, id int64) (Product, error) {
 
 const getProductByCategoryId = `-- name: GetProductByCategoryId :many
 
-SELECT id, category_id, name, image_url, description, price, created_at FROM products WHERE category_id = $1 LIMIT 1
+SELECT id, category_id, name, image_url, description, price, qty, created_at FROM products WHERE category_id = $1 LIMIT $2 OFFSET $3
 `
 
-func (q *Queries) GetProductByCategoryId(ctx context.Context, categoryID int64) ([]Product, error) {
-	rows, err := q.db.QueryContext(ctx, getProductByCategoryId, categoryID)
+type GetProductByCategoryIdParams struct {
+	CategoryID int64 `json:"category_id"`
+	Limit      int32 `json:"limit"`
+	Offset     int32 `json:"offset"`
+}
+
+func (q *Queries) GetProductByCategoryId(ctx context.Context, arg GetProductByCategoryIdParams) ([]Product, error) {
+	rows, err := q.db.QueryContext(ctx, getProductByCategoryId, arg.CategoryID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -93,6 +104,7 @@ func (q *Queries) GetProductByCategoryId(ctx context.Context, categoryID int64) 
 			&i.ImageUrl,
 			&i.Description,
 			&i.Price,
+			&i.Qty,
 			&i.CreatedAt,
 		); err != nil {
 			return nil, err

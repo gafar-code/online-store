@@ -48,6 +48,7 @@ type Product struct {
 	ImageUrl    string    `json:"image_url"`
 	Description string    `json:"description"`
 	Price       int64     `json:"price"`
+	Qty         int64     `json:"qty"`
 	CreatedAt   time.Time `json:"created_at"`
 }
 

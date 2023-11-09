@@ -51,16 +51,17 @@ func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionPa
 
 const listTransactionByCustomerId = `-- name: ListTransactionByCustomerId :many
 
-SELECT id, customer_id, status, issued_at, order_id, created_at FROM transactions ORDER BY customer_id LIMIT $1 OFFSET $2
+SELECT id, customer_id, status, issued_at, order_id, created_at FROM transactions WHERE customer_id = $3 LIMIT $1 OFFSET $2
 `
 
 type ListTransactionByCustomerIdParams struct {
-	Limit  int32 `json:"limit"`
-	Offset int32 `json:"offset"`
+	Limit      int32 `json:"limit"`
+	Offset     int32 `json:"offset"`
+	CustomerID int64 `json:"customer_id"`
 }
 
 func (q *Queries) ListTransactionByCustomerId(ctx context.Context, arg ListTransactionByCustomerIdParams) ([]Transaction, error) {
-	rows, err := q.db.QueryContext(ctx, listTransactionByCustomerId, arg.Limit, arg.Offset)
+	rows, err := q.db.QueryContext(ctx, listTransactionByCustomerId, arg.Limit, arg.Offset, arg.CustomerID)
 	if err != nil {
 		return nil, err
 	}

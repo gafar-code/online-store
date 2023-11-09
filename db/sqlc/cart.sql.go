@@ -46,13 +46,37 @@ func (q *Queries) DeleteCart(ctx context.Context, id int64) error {
 	return err
 }
 
-const getCartByCustomerId = `-- name: GetCartByCustomerId :many
+const getCart = `-- name: GetCart :one
 
-SELECT id, customer_id, product_id, qty, created_at FROM carts WHERE customer_id = $1 LIMIT 1
+SELECT id, customer_id, product_id, qty, created_at FROM carts WHERE id = $1 LIMIT 1
 `
 
-func (q *Queries) GetCartByCustomerId(ctx context.Context, customerID int64) ([]Cart, error) {
-	rows, err := q.db.QueryContext(ctx, getCartByCustomerId, customerID)
+func (q *Queries) GetCart(ctx context.Context, id int64) (Cart, error) {
+	row := q.db.QueryRowContext(ctx, getCart, id)
+	var i Cart
+	err := row.Scan(
+		&i.ID,
+		&i.CustomerID,
+		&i.ProductID,
+		&i.Qty,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const getCartByCustomerId = `-- name: GetCartByCustomerId :many
+
+SELECT id, customer_id, product_id, qty, created_at FROM carts WHERE customer_id = $1 LIMIT $2 OFFSET $3
+`
+
+type GetCartByCustomerIdParams struct {
+	CustomerID int64 `json:"customer_id"`
+	Limit      int32 `json:"limit"`
+	Offset     int32 `json:"offset"`
+}
+
+func (q *Queries) GetCartByCustomerId(ctx context.Context, arg GetCartByCustomerIdParams) ([]Cart, error) {
+	rows, err := q.db.QueryContext(ctx, getCartByCustomerId, arg.CustomerID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}

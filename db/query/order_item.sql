@@ -11,4 +11,4 @@ RETURNING *;
 
 -- name: ListOrderItemByOrderId :many
 
-SELECT * FROM order_items ORDER BY order_id LIMIT $1 OFFSET $2;
+SELECT * FROM order_items WHERE order_id = $1 LIMIT $2 OFFSET $3;

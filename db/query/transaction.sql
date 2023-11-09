@@ -12,4 +12,4 @@ RETURNING *;
 
 -- name: ListTransactionByCustomerId :many
 
-SELECT * FROM transactions ORDER BY customer_id LIMIT $1 OFFSET $2;
+SELECT * FROM transactions WHERE customer_id = $3 LIMIT $1 OFFSET $2;
