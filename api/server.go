@@ -2,7 +2,6 @@ package api
 
 import (
 	"fmt"
-	"time"
 
 	db "github.com/gafar-code/online-store/db/sqlc"
 	"github.com/gafar-code/online-store/token"
@@ -18,23 +17,13 @@ type Server struct {
 	router     *gin.Engine
 }
 
-type GETSuccess struct {
-	Code int32 `json:"code"`
-	Data any   `json:"data"`
-}
-
-type POSTDataSuccess struct {
+type ResponseData struct {
 	Code    int32  `json:"code"`
 	Message string `json:"message"`
 	Data    any    `json:"data"`
 }
 
-type POSTSuccess struct {
-	Code    int32  `json:"code"`
-	Message string `json:"message"`
-}
-
-type ResponseErr struct {
+type Response struct {
 	Code    int32  `json:"code"`
 	Message string `json:"message"`
 }
@@ -43,7 +32,7 @@ var tokenMaker token.Maker
 
 func errorHandler(c *gin.Context, err error, code int) {
 	if err != nil {
-		c.JSON(code, ResponseErr{
+		c.JSON(code, Response{
 			Code:    int32(code),
 			Message: err.Error(),
 		})
@@ -70,7 +59,6 @@ func NewServer(config util.Config, q *db.Queries) (server *Server, err error) {
 		AllowHeaders:     []string{"Content-Type", "api_key", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
-		MaxAge:           12 * time.Hour,
 	}))
 
 	middleware := []MiddlewareFunc{

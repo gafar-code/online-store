@@ -37,7 +37,7 @@ func AuthMiddleware(c *gin.Context) {
 		authorizationHeader := c.GetHeader(authorizationKey)
 		if len(authorizationHeader) == 0 {
 			err := errors.New("authorization header is not provided")
-			c.AbortWithStatusJSON(http.StatusUnauthorized, ResponseErr{
+			c.AbortWithStatusJSON(http.StatusUnauthorized, Response{
 				Code:    http.StatusUnauthorized,
 				Message: err.Error(),
 			})
@@ -47,7 +47,7 @@ func AuthMiddleware(c *gin.Context) {
 		fields := strings.Fields(authorizationHeader)
 		if len(fields) < 2 {
 			err := errors.New("invalid authorization header format")
-			c.AbortWithStatusJSON(http.StatusUnauthorized, ResponseErr{
+			c.AbortWithStatusJSON(http.StatusUnauthorized, Response{
 				Code:    http.StatusUnauthorized,
 				Message: err.Error(),
 			})
@@ -57,7 +57,7 @@ func AuthMiddleware(c *gin.Context) {
 		authorizationType := strings.ToLower(fields[0])
 		if authorizationType != authorizationBearer {
 			err := fmt.Errorf("unsupported authorization type %s", authorizationType)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, ResponseErr{
+			c.AbortWithStatusJSON(http.StatusUnauthorized, Response{
 				Code:    http.StatusUnauthorized,
 				Message: err.Error(),
 			})
@@ -67,7 +67,7 @@ func AuthMiddleware(c *gin.Context) {
 		accessToken := fields[1]
 		payload, err := tokenMaker.VerifyToken(accessToken)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, ResponseErr{
+			c.AbortWithStatusJSON(http.StatusUnauthorized, Response{
 				Code:    http.StatusUnauthorized,
 				Message: err.Error(),
 			})

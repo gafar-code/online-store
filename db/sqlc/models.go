@@ -22,7 +22,6 @@ type Customer struct {
 	Email     string    `json:"email"`
 	Password  string    `json:"password"`
 	Address   string    `json:"address"`
-	Token     string    `json:"token"`
 	CreatedAt time.Time `json:"created_at"`
 }
 

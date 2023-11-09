@@ -108,8 +108,8 @@ type UpdatePaymentJSONBody struct {
 	VirtualAccountId int     `json:"virtual_account_id"`
 }
 
-// GetProductByCategoryIdParams defines parameters for GetProductByCategoryId.
-type GetProductByCategoryIdParams struct {
+// ListProductParams defines parameters for ListProduct.
+type ListProductParams struct {
 	// Page The page number you want to retrieve, starting from page 1
 	Page int `form:"page" json:"page"`
 

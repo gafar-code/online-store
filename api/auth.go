@@ -31,12 +31,12 @@ type customerResponse struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-const tokenDuration = 24 * time.Minute
+const tokenDuration = 7 * (24 * time.Hour)
 
 func (server *Server) Login(c *gin.Context) {
 	var req loginReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, ResponseErr{
+		c.JSON(http.StatusBadRequest, Response{
 			Code:    http.StatusBadRequest,
 			Message: err.Error(),
 		})
@@ -47,14 +47,14 @@ func (server *Server) Login(c *gin.Context) {
 
 	if err != nil {
 		if util.IsEmpty(customer) {
-			c.JSON(http.StatusNotFound, ResponseErr{
+			c.JSON(http.StatusNotFound, Response{
 				Code:    http.StatusNotFound,
 				Message: "Email Tidak Terdaftar",
 			})
 			return
 		}
 
-		c.JSON(http.StatusInternalServerError, ResponseErr{
+		c.JSON(http.StatusInternalServerError, Response{
 			Code:    http.StatusInternalServerError,
 			Message: err.Error(),
 		})
@@ -63,7 +63,7 @@ func (server *Server) Login(c *gin.Context) {
 
 	err = bcrypt.CompareHashAndPassword([]byte(customer.Password), []byte(req.Password))
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, ResponseErr{
+		c.JSON(http.StatusUnauthorized, Response{
 			Code:    http.StatusUnauthorized,
 			Message: "Password Salah",
 		})
@@ -72,14 +72,14 @@ func (server *Server) Login(c *gin.Context) {
 
 	token, err := tokenMaker.CreateToken(customer.Email, tokenDuration)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, ResponseErr{
+		c.JSON(http.StatusInternalServerError, Response{
 			Code:    http.StatusInternalServerError,
 			Message: err.Error(),
 		})
 		return
 	}
 
-	c.JSON(http.StatusOK, POSTDataSuccess{
+	c.JSON(http.StatusOK, ResponseData{
 		Code:    http.StatusOK,
 		Message: "Login Berhasil!",
 		Data: customerResponse{
@@ -95,7 +95,7 @@ func (server *Server) Login(c *gin.Context) {
 func (server *Server) Register(c *gin.Context) {
 	var req registerReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, ResponseErr{
+		c.JSON(http.StatusBadRequest, Response{
 			Code:    http.StatusBadRequest,
 			Message: err.Error(),
 		})
@@ -105,7 +105,7 @@ func (server *Server) Register(c *gin.Context) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, ResponseErr{
+		c.JSON(http.StatusInternalServerError, Response{
 			Code:    http.StatusInternalServerError,
 			Message: err.Error(),
 		})
@@ -114,7 +114,7 @@ func (server *Server) Register(c *gin.Context) {
 
 	customer, _ := server.q.GetCustomerByEmail(c, req.Email)
 	if !util.IsEmpty(customer) {
-		c.JSON(http.StatusConflict, ResponseErr{
+		c.JSON(http.StatusConflict, Response{
 			Code:    http.StatusConflict,
 			Message: "Email Sudah Terdaftar",
 		})
@@ -124,7 +124,7 @@ func (server *Server) Register(c *gin.Context) {
 
 	token, err := tokenMaker.CreateToken(customer.Email, tokenDuration)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, ResponseErr{
+		c.JSON(http.StatusInternalServerError, Response{
 			Code:    http.StatusInternalServerError,
 			Message: err.Error(),
 		})
@@ -136,20 +136,19 @@ func (server *Server) Register(c *gin.Context) {
 		Email:    req.Email,
 		Password: string(hashedPassword),
 		Address:  req.Address,
-		Token:    token,
 	}
 
 	customer, err = server.q.CreateCustomer(c, arg)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, ResponseErr{
+		c.JSON(http.StatusInternalServerError, Response{
 			Code:    http.StatusInternalServerError,
 			Message: err.Error(),
 		})
 		return
 	}
 
-	c.JSON(http.StatusCreated, POSTDataSuccess{
+	c.JSON(http.StatusCreated, ResponseData{
 		Code:    http.StatusCreated,
 		Message: "Registrasi Berhasil!",
 		Data: customerResponse{

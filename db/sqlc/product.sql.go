@@ -56,13 +56,56 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (P
 	return i, err
 }
 
-const getProduct = `-- name: GetProduct :one
+const getProductByCategoryId = `-- name: GetProductByCategoryId :many
+
+SELECT id, category_id, name, image_url, description, price, qty, created_at FROM products WHERE category_id = $1 LIMIT $2 OFFSET $3
+`
+
+type GetProductByCategoryIdParams struct {
+	CategoryID int64 `json:"category_id"`
+	Limit      int32 `json:"limit"`
+	Offset     int32 `json:"offset"`
+}
+
+func (q *Queries) GetProductByCategoryId(ctx context.Context, arg GetProductByCategoryIdParams) ([]Product, error) {
+	rows, err := q.db.QueryContext(ctx, getProductByCategoryId, arg.CategoryID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Product{}
+	for rows.Next() {
+		var i Product
+		if err := rows.Scan(
+			&i.ID,
+			&i.CategoryID,
+			&i.Name,
+			&i.ImageUrl,
+			&i.Description,
+			&i.Price,
+			&i.Qty,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getProductDetail = `-- name: GetProductDetail :one
 
 SELECT id, category_id, name, image_url, description, price, qty, created_at FROM products WHERE id = $1 LIMIT 1
 `
 
-func (q *Queries) GetProduct(ctx context.Context, id int64) (Product, error) {
-	row := q.db.QueryRowContext(ctx, getProduct, id)
+func (q *Queries) GetProductDetail(ctx context.Context, id int64) (Product, error) {
+	row := q.db.QueryRowContext(ctx, getProductDetail, id)
 	var i Product
 	err := row.Scan(
 		&i.ID,
@@ -77,19 +120,18 @@ func (q *Queries) GetProduct(ctx context.Context, id int64) (Product, error) {
 	return i, err
 }
 
-const getProductByCategoryId = `-- name: GetProductByCategoryId :many
+const listProduct = `-- name: ListProduct :many
 
-SELECT id, category_id, name, image_url, description, price, qty, created_at FROM products WHERE category_id = $1 LIMIT $2 OFFSET $3
+SELECT id, category_id, name, image_url, description, price, qty, created_at FROM products ORDER BY id LIMIT $1 OFFSET $2
 `
 
-type GetProductByCategoryIdParams struct {
-	CategoryID int64 `json:"category_id"`
-	Limit      int32 `json:"limit"`
-	Offset     int32 `json:"offset"`
+type ListProductParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
 }
 
-func (q *Queries) GetProductByCategoryId(ctx context.Context, arg GetProductByCategoryIdParams) ([]Product, error) {
-	rows, err := q.db.QueryContext(ctx, getProductByCategoryId, arg.CategoryID, arg.Limit, arg.Offset)
+func (q *Queries) ListProduct(ctx context.Context, arg ListProductParams) ([]Product, error) {
+	rows, err := q.db.QueryContext(ctx, listProduct, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}

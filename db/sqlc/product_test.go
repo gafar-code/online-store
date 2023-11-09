@@ -45,7 +45,7 @@ func TestCreateProduct(t *testing.T) {
 
 func TestGetProduct(t *testing.T) {
 	prod1 := createRandomProduct(t)
-	prod2, err := testQueries.GetProduct(context.Background(), prod1.ID)
+	prod2, err := testQueries.GetProductDetail(context.Background(), prod1.ID)
 
 	require.NoError(t, err)
 	require.NotEmpty(t, prod2)

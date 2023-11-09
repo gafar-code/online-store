@@ -39,7 +39,7 @@ type ServerInterface interface {
 	UpdatePayment(c *gin.Context, id int)
 
 	// (GET /product)
-	GetProductByCategoryId(c *gin.Context, params GetProductByCategoryIdParams)
+	ListProduct(c *gin.Context, params ListProductParams)
 
 	// (GET /product/{id})
 	GetProductDetail(c *gin.Context, id int)
@@ -239,15 +239,15 @@ func (siw *ServerInterfaceWrapper) UpdatePayment(c *gin.Context) {
 	siw.Handler.UpdatePayment(c, id)
 }
 
-// GetProductByCategoryId operation middleware
-func (siw *ServerInterfaceWrapper) GetProductByCategoryId(c *gin.Context) {
+// ListProduct operation middleware
+func (siw *ServerInterfaceWrapper) ListProduct(c *gin.Context) {
 
 	var err error
 
 	c.Set(BearerAuthScopes, []string{})
 
 	// Parameter object where we will unmarshal all parameters from the context
-	var params GetProductByCategoryIdParams
+	var params ListProductParams
 
 	// ------------- Required query parameter "page" -------------
 
@@ -294,7 +294,7 @@ func (siw *ServerInterfaceWrapper) GetProductByCategoryId(c *gin.Context) {
 		}
 	}
 
-	siw.Handler.GetProductByCategoryId(c, params)
+	siw.Handler.ListProduct(c, params)
 }
 
 // GetProductDetail operation middleware
@@ -408,7 +408,7 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 	router.DELETE(options.BaseURL+"/cart/delete-all", wrapper.DeleteAllCart)
 	router.POST(options.BaseURL+"/order", wrapper.AddOrder)
 	router.PUT(options.BaseURL+"/order/:id", wrapper.UpdatePayment)
-	router.GET(options.BaseURL+"/product", wrapper.GetProductByCategoryId)
+	router.GET(options.BaseURL+"/product", wrapper.ListProduct)
 	router.GET(options.BaseURL+"/product/:id", wrapper.GetProductDetail)
 	router.GET(options.BaseURL+"/transaction", wrapper.ListOrders)
 }

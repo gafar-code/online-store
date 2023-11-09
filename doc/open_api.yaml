@@ -238,7 +238,7 @@ paths:
     get:
       tags:
         - "product"
-      operationId: GetProductByCategoryId
+      operationId: ListProduct
       security:
         - BearerAuth: []
       parameters:

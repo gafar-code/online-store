@@ -41,11 +41,14 @@ func (wraper *ServerWraper) AddOrder(c *gin.Context) {
 func (wraper *ServerWraper) UpdatePayment(c *gin.Context, id int) {}
 
 // (GET /product)
-func (wraper *ServerWraper) GetProductByCategoryId(c *gin.Context, params GetProductByCategoryIdParams) {
+func (wraper *ServerWraper) ListProduct(c *gin.Context, params ListProductParams) {
+	wraper.server.ListProduct(c)
 }
 
 // (GET /product/{id})
-func (wraper *ServerWraper) GetProductDetail(c *gin.Context, id int) {}
+func (wraper *ServerWraper) GetProductDetail(c *gin.Context, id int) {
+	wraper.server.GetProductDetail(c)
+}
 
 // (GET /transaction)
 func (wraper *ServerWraper) ListOrders(c *gin.Context, params ListOrdersParams) {}

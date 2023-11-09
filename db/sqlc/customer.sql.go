@@ -16,11 +16,10 @@ INSERT INTO
         name,
         email,
         password,
-        address,
-        token
+        address
     )
-VALUES ($1, $2, $3, $4, $5)
-RETURNING id, name, email, password, address, token, created_at
+VALUES ($1, $2, $3, $4)
+RETURNING id, name, email, password, address, created_at
 `
 
 type CreateCustomerParams struct {
@@ -28,7 +27,6 @@ type CreateCustomerParams struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 	Address  string `json:"address"`
-	Token    string `json:"token"`
 }
 
 func (q *Queries) CreateCustomer(ctx context.Context, arg CreateCustomerParams) (Customer, error) {
@@ -37,7 +35,6 @@ func (q *Queries) CreateCustomer(ctx context.Context, arg CreateCustomerParams) 
 		arg.Email,
 		arg.Password,
 		arg.Address,
-		arg.Token,
 	)
 	var i Customer
 	err := row.Scan(
@@ -46,7 +43,6 @@ func (q *Queries) CreateCustomer(ctx context.Context, arg CreateCustomerParams) 
 		&i.Email,
 		&i.Password,
 		&i.Address,
-		&i.Token,
 		&i.CreatedAt,
 	)
 	return i, err
@@ -54,7 +50,7 @@ func (q *Queries) CreateCustomer(ctx context.Context, arg CreateCustomerParams) 
 
 const getCustomerByEmail = `-- name: GetCustomerByEmail :one
 
-SELECT id, name, email, password, address, token, created_at FROM customers WHERE email = $1 LIMIT 1
+SELECT id, name, email, password, address, created_at FROM customers WHERE email = $1 LIMIT 1
 `
 
 func (q *Queries) GetCustomerByEmail(ctx context.Context, email string) (Customer, error) {
@@ -66,7 +62,6 @@ func (q *Queries) GetCustomerByEmail(ctx context.Context, email string) (Custome
 		&i.Email,
 		&i.Password,
 		&i.Address,
-		&i.Token,
 		&i.CreatedAt,
 	)
 	return i, err
