@@ -29,8 +29,8 @@ type ServerInterface interface {
 	// (POST /cart)
 	AddToCart(c *gin.Context)
 
-	// (DELETE /cart/delete-all)
-	DeleteAllCart(c *gin.Context)
+	// (DELETE /cart/bulk)
+	BulkDeleteCart(c *gin.Context, params BulkDeleteCartParams)
 
 	// (POST /order)
 	AddOrder(c *gin.Context)
@@ -93,18 +93,18 @@ func (siw *ServerInterfaceWrapper) DeleteProductFromCart(c *gin.Context) {
 	// Parameter object where we will unmarshal all parameters from the context
 	var params DeleteProductFromCartParams
 
-	// ------------- Required query parameter "cart_id" -------------
+	// ------------- Required query parameter "product_id" -------------
 
-	if paramValue := c.Query("cart_id"); paramValue != "" {
+	if paramValue := c.Query("product_id"); paramValue != "" {
 
 	} else {
-		siw.ErrorHandler(c, fmt.Errorf("Query argument cart_id is required, but not found"), http.StatusBadRequest)
+		siw.ErrorHandler(c, fmt.Errorf("Query argument product_id is required, but not found"), http.StatusBadRequest)
 		return
 	}
 
-	err = runtime.BindQueryParameter("form", true, true, "cart_id", c.Request.URL.Query(), &params.CartId)
+	err = runtime.BindQueryParameter("form", true, true, "product_id", c.Request.URL.Query(), &params.ProductId)
 	if err != nil {
-		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter cart_id: %w", err), http.StatusBadRequest)
+		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter product_id: %w", err), http.StatusBadRequest)
 		return
 	}
 
@@ -183,10 +183,30 @@ func (siw *ServerInterfaceWrapper) AddToCart(c *gin.Context) {
 	siw.Handler.AddToCart(c)
 }
 
-// DeleteAllCart operation middleware
-func (siw *ServerInterfaceWrapper) DeleteAllCart(c *gin.Context) {
+// BulkDeleteCart operation middleware
+func (siw *ServerInterfaceWrapper) BulkDeleteCart(c *gin.Context) {
+
+	var err error
 
 	c.Set(BearerAuthScopes, []string{})
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params BulkDeleteCartParams
+
+	// ------------- Required query parameter "product_ids" -------------
+
+	if paramValue := c.Query("product_ids"); paramValue != "" {
+
+	} else {
+		siw.ErrorHandler(c, fmt.Errorf("Query argument product_ids is required, but not found"), http.StatusBadRequest)
+		return
+	}
+
+	err = runtime.BindQueryParameter("form", true, true, "product_ids", c.Request.URL.Query(), &params.ProductIds)
+	if err != nil {
+		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter product_ids: %w", err), http.StatusBadRequest)
+		return
+	}
 
 	for _, middleware := range siw.HandlerMiddlewares {
 		middleware(c)
@@ -195,7 +215,7 @@ func (siw *ServerInterfaceWrapper) DeleteAllCart(c *gin.Context) {
 		}
 	}
 
-	siw.Handler.DeleteAllCart(c)
+	siw.Handler.BulkDeleteCart(c, params)
 }
 
 // AddOrder operation middleware
@@ -405,7 +425,7 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 	router.DELETE(options.BaseURL+"/cart", wrapper.DeleteProductFromCart)
 	router.GET(options.BaseURL+"/cart", wrapper.GetCart)
 	router.POST(options.BaseURL+"/cart", wrapper.AddToCart)
-	router.DELETE(options.BaseURL+"/cart/delete-all", wrapper.DeleteAllCart)
+	router.DELETE(options.BaseURL+"/cart/bulk", wrapper.BulkDeleteCart)
 	router.POST(options.BaseURL+"/order", wrapper.AddOrder)
 	router.PUT(options.BaseURL+"/order/:id", wrapper.UpdatePayment)
 	router.GET(options.BaseURL+"/product", wrapper.ListProduct)

@@ -20,17 +20,23 @@ func (wraper *ServerWraper) Register(c *gin.Context) {
 
 // (DELETE /cart)
 func (wraper *ServerWraper) DeleteProductFromCart(c *gin.Context, params DeleteProductFromCartParams) {
-
+	wraper.server.DeleteProductFromCart(c)
 }
 
 // (GET /cart)
-func (wraper *ServerWraper) GetCart(c *gin.Context, params GetCartParams) {}
+func (wraper *ServerWraper) GetCart(c *gin.Context, params GetCartParams) {
+	wraper.server.GetCart(c)
+}
 
 // (POST /cart)
-func (wraper *ServerWraper) AddToCart(c *gin.Context) {}
+func (wraper *ServerWraper) AddToCart(c *gin.Context) {
+	wraper.server.AddToCart(c)
+}
 
-// (DELETE /cart/delete-all)
-func (wraper *ServerWraper) DeleteAllCart(c *gin.Context) {}
+// (DELETE /cart/bulk)
+func (wraper *ServerWraper) BulkDeleteCart(c *gin.Context, params BulkDeleteCartParams) {
+	wraper.server.BulkDeleteCart(c)
+}
 
 // (POST /order)
 func (wraper *ServerWraper) AddOrder(c *gin.Context) {

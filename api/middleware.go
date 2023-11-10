@@ -21,15 +21,16 @@ func AuthMiddleware(c *gin.Context) {
 		"/api/v1/product",
 		"/api/v1/product/:id",
 		"/api/v1/cart",
-		"/api/v1/cart/delete-all",
+		"/api/v1/cart/bulk",
 		"/api/v1/order",
 		"/api/v1/order/:id",
 		"/api/v1/transaction",
 	}
 
 	for _, item := range mustBeValidated {
-		if item == c.Request.URL.Path {
+		if strings.Contains(c.Request.URL.Path, item) {
 			useValidation = true
+			break
 		}
 	}
 

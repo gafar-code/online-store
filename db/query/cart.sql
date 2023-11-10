@@ -9,6 +9,10 @@ RETURNING *;
 
 SELECT * FROM carts WHERE customer_id = $1 LIMIT $2 OFFSET $3;
 
+-- name: GetExistingCart :one
+
+SELECT * FROM carts WHERE customer_id = $1 AND product_id = $2 LIMIT 1;
+
 -- name: GetCart :one
 
 SELECT * FROM carts WHERE id = $1 LIMIT 1;
@@ -19,4 +23,4 @@ UPDATE carts SET qty = $2 WHERE id = $1 RETURNING *;
 
 -- name: DeleteCart :exec
 
-DELETE FROM carts WHERE id = $1;
+DELETE FROM carts WHERE product_id = $1;

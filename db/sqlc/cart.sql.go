@@ -38,11 +38,11 @@ func (q *Queries) CreateCart(ctx context.Context, arg CreateCartParams) (Cart, e
 
 const deleteCart = `-- name: DeleteCart :exec
 
-DELETE FROM carts WHERE id = $1
+DELETE FROM carts WHERE product_id = $1
 `
 
-func (q *Queries) DeleteCart(ctx context.Context, id int64) error {
-	_, err := q.db.ExecContext(ctx, deleteCart, id)
+func (q *Queries) DeleteCart(ctx context.Context, productID int64) error {
+	_, err := q.db.ExecContext(ctx, deleteCart, productID)
 	return err
 }
 
@@ -102,6 +102,29 @@ func (q *Queries) GetCartByCustomerId(ctx context.Context, arg GetCartByCustomer
 		return nil, err
 	}
 	return items, nil
+}
+
+const getExistingCart = `-- name: GetExistingCart :one
+
+SELECT id, customer_id, product_id, qty, created_at FROM carts WHERE customer_id = $1 AND product_id = $2 LIMIT 1
+`
+
+type GetExistingCartParams struct {
+	CustomerID int64 `json:"customer_id"`
+	ProductID  int64 `json:"product_id"`
+}
+
+func (q *Queries) GetExistingCart(ctx context.Context, arg GetExistingCartParams) (Cart, error) {
+	row := q.db.QueryRowContext(ctx, getExistingCart, arg.CustomerID, arg.ProductID)
+	var i Cart
+	err := row.Scan(
+		&i.ID,
+		&i.CustomerID,
+		&i.ProductID,
+		&i.Qty,
+		&i.CreatedAt,
+	)
+	return i, err
 }
 
 const updateCart = `-- name: UpdateCart :one

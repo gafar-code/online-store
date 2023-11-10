@@ -13,6 +13,15 @@ const (
 	BearerAuthScopes = "BearerAuth.Scopes"
 )
 
+// Cart defines model for Cart.
+type Cart struct {
+	CreatedAt  *time.Time `json:"created_at,omitempty"`
+	CustomerId *int       `json:"customer_id,omitempty"`
+	Id         *int       `json:"id,omitempty"`
+	ProductId  *int       `json:"product_id,omitempty"`
+	Qty        *int       `json:"qty,omitempty"`
+}
+
 // Customer defines model for Customer.
 type Customer struct {
 	Address   *string              `json:"address,omitempty"`
@@ -73,7 +82,7 @@ type RegisterJSONBody struct {
 
 // DeleteProductFromCartParams defines parameters for DeleteProductFromCart.
 type DeleteProductFromCartParams struct {
-	CartId int `form:"cart_id" json:"cart_id"`
+	ProductId int `form:"product_id" json:"product_id"`
 }
 
 // GetCartParams defines parameters for GetCart.
@@ -88,7 +97,11 @@ type GetCartParams struct {
 // AddToCartJSONBody defines parameters for AddToCart.
 type AddToCartJSONBody struct {
 	ProductId *int `json:"product_id,omitempty"`
-	Qty       *int `json:"qty,omitempty"`
+}
+
+// BulkDeleteCartParams defines parameters for BulkDeleteCart.
+type BulkDeleteCartParams struct {
+	ProductIds []int `form:"product_ids" json:"product_ids"`
 }
 
 // AddOrderJSONBody defines parameters for AddOrder.

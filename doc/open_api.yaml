@@ -67,6 +67,24 @@ components:
         created_at:
           type: string
           format: date-time
+    Cart:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        customer_id:
+          type: integer
+          example: 1
+        product_id:
+          type: integer
+          example: 12
+        qty:
+          type: integer
+          example: 30
+        created_at:
+          type: string
+          format: date-time
     Order:
       type: object
       properties:
@@ -372,9 +390,6 @@ paths:
                 product_id:
                   type: integer
                   example: 10
-                qty:
-                  type: integer
-                  example: 1
       responses:
         "201":
           description: Add Product to Shopping Cart Success
@@ -390,6 +405,8 @@ paths:
                   message:
                     type: string
                     example: "The product has been added to the cart"
+                  data:
+                    $ref: "#/components/schemas/Cart"
         "500":
           description: Login Failed
           content:
@@ -424,7 +441,7 @@ paths:
           required: true
           schema:
             type: integer
-            example: 1 
+            example: 10 
       responses:
         "200":
           description: Get Shopping Cart
@@ -476,7 +493,7 @@ paths:
         - BearerAuth: []
       parameters:
         - in: query
-          name: cart_id
+          name: product_id
           required: true
           schema:
             type: integer
@@ -496,9 +513,9 @@ paths:
                     example: 204
                   message:
                     type: string
-                    example: "Delete All Cart Succesfully"
+                    example: "Delete Cart Succesfully"
         "500":
-          description: Delete All Cart Succes Failed
+          description: Delete Cart Succes Failed
           content:
             application/json:
               schema:
@@ -510,16 +527,25 @@ paths:
                     example: 500
                   message:
                     type: string
-                    example: "Delete All Cart Failed"
+                    example: "Delete Cart Failed"
 
 
-  /cart/delete-all:
+  /cart/bulk:
     delete:
       tags:
         - "cart"
-      operationId: DeleteAllCart
+      operationId: BulkDeleteCart
       security:
         - BearerAuth: []
+      parameters:
+        - in: query
+          name: product_ids
+          required: true
+          schema:
+            type: array
+            items:
+              type: integer
+              example: 1
       responses:
         "204":
           description: Delete All Cart Succes
