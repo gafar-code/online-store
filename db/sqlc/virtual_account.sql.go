@@ -42,16 +42,11 @@ func (q *Queries) CreateVirtualAccount(ctx context.Context, arg CreateVirtualAcc
 
 const listVirtualAccount = `-- name: ListVirtualAccount :many
 
-SELECT id, name, description, rekening_number, created_at FROM virtual_accounts ORDER BY id LIMIT $1 OFFSET $2
+SELECT id, name, description, rekening_number, created_at FROM virtual_accounts ORDER BY id
 `
 
-type ListVirtualAccountParams struct {
-	Limit  int32 `json:"limit"`
-	Offset int32 `json:"offset"`
-}
-
-func (q *Queries) ListVirtualAccount(ctx context.Context, arg ListVirtualAccountParams) ([]VirtualAccount, error) {
-	rows, err := q.db.QueryContext(ctx, listVirtualAccount, arg.Limit, arg.Offset)
+func (q *Queries) ListVirtualAccount(ctx context.Context) ([]VirtualAccount, error) {
+	rows, err := q.db.QueryContext(ctx, listVirtualAccount)
 	if err != nil {
 		return nil, err
 	}

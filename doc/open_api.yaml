@@ -134,6 +134,25 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Product"
+    VirtualAccount:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          example: 1
+        name:
+          type: string
+          example: "BCA Virtual Account - Online Store"
+        rekening_number:
+          type: integer
+          example: 6537538
+        description:
+          type: string
+          example: "<b><b/>"
+        created_at:
+          type: string
+          format: date-time
 
 paths:
   /auth/register:
@@ -782,3 +801,44 @@ paths:
                     example: "Fetch Product Failed"
 
 
+  /virtual-account:
+    get:
+      tags:
+        - "virtual-account"
+      operationId: ListVirtualAccount
+      security:
+        - BearerAuth: []
+
+      responses:
+        "200":
+          description: Fetch VirtualAccount Success
+          content:
+            "application/json":
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 200
+                  message:
+                    type: string
+                    example: "Fetch VirtualAccount Success"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/VirtualAccount"
+        "500":
+          description: Login Failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 500
+                  message:
+                    type: string
+                    example: "Fetch Product Failed"

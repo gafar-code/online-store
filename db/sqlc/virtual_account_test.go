@@ -40,12 +40,7 @@ func TestListVirtualAccount(t *testing.T) {
 		createRandomVirtualAccount(t)
 	}
 
-	arg := ListVirtualAccountParams{
-		Limit:  5,
-		Offset: 5,
-	}
-
-	accounts, err := testQueries.ListVirtualAccount(context.Background(), arg)
+	accounts, err := testQueries.ListVirtualAccount(context.Background())
 
 	require.NoError(t, err)
 	require.Len(t, accounts, 5)

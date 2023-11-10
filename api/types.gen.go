@@ -66,6 +66,15 @@ type Transaction struct {
 	Status    *string    `json:"status,omitempty"`
 }
 
+// VirtualAccount defines model for VirtualAccount.
+type VirtualAccount struct {
+	CreatedAt      *time.Time `json:"created_at,omitempty"`
+	Description    *string    `json:"description,omitempty"`
+	Id             *int32     `json:"id,omitempty"`
+	Name           *string    `json:"name,omitempty"`
+	RekeningNumber *int       `json:"rekening_number,omitempty"`
+}
+
 // LoginJSONBody defines parameters for Login.
 type LoginJSONBody struct {
 	Email    openapi_types.Email `json:"email"`

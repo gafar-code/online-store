@@ -46,6 +46,9 @@ type ServerInterface interface {
 
 	// (GET /transaction)
 	ListOrders(c *gin.Context, params ListOrdersParams)
+
+	// (GET /virtual-account)
+	ListVirtualAccount(c *gin.Context)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -393,6 +396,21 @@ func (siw *ServerInterfaceWrapper) ListOrders(c *gin.Context) {
 	siw.Handler.ListOrders(c, params)
 }
 
+// ListVirtualAccount operation middleware
+func (siw *ServerInterfaceWrapper) ListVirtualAccount(c *gin.Context) {
+
+	c.Set(BearerAuthScopes, []string{})
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+		if c.IsAborted() {
+			return
+		}
+	}
+
+	siw.Handler.ListVirtualAccount(c)
+}
+
 // GinServerOptions provides options for the Gin server.
 type GinServerOptions struct {
 	BaseURL      string
@@ -431,4 +449,5 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 	router.GET(options.BaseURL+"/product", wrapper.ListProduct)
 	router.GET(options.BaseURL+"/product/:id", wrapper.GetProductDetail)
 	router.GET(options.BaseURL+"/transaction", wrapper.ListOrders)
+	router.GET(options.BaseURL+"/virtual-account", wrapper.ListVirtualAccount)
 }

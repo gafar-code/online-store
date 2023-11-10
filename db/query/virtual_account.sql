@@ -11,4 +11,4 @@ RETURNING *;
 
 -- name: ListVirtualAccount :many
 
-SELECT * FROM virtual_accounts ORDER BY id LIMIT $1 OFFSET $2;
+SELECT * FROM virtual_accounts ORDER BY id;

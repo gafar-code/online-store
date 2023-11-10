@@ -58,3 +58,8 @@ func (wraper *ServerWraper) GetProductDetail(c *gin.Context, id int) {
 
 // (GET /transaction)
 func (wraper *ServerWraper) ListOrders(c *gin.Context, params ListOrdersParams) {}
+
+// (GET /virtual-account)
+func (wraper *ServerWraper) ListVirtualAccount(c *gin.Context) {
+	wraper.server.ListVirtualAccount(c)
+}
