@@ -23,6 +23,7 @@ func AuthMiddleware(c *gin.Context) {
 		"/api/v1/cart",
 		"/api/v1/cart/bulk",
 		"/api/v1/order",
+		"/api/v1/order/proof",
 		"/api/v1/order/:id",
 		"/api/v1/virtual-account",
 		"/api/v1/transaction",

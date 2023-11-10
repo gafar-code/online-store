@@ -6,9 +6,12 @@ INSERT INTO
         description,
         rekening_number
     )
-VALUES ($1, $2, $3)
-RETURNING *;
+VALUES ($1, $2, $3) RETURNING *;
 
 -- name: ListVirtualAccount :many
 
 SELECT * FROM virtual_accounts ORDER BY id;
+
+-- name: GetVirtualAccount :one
+
+SELECT * FROM virtual_accounts WHERE id = $1 LIMIT 1;

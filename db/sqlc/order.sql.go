@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"time"
 )
 
 const createOrder = `-- name: CreateOrder :one
@@ -14,27 +15,61 @@ const createOrder = `-- name: CreateOrder :one
 INSERT INTO
     orders (
         customer_id,
+        amount,
         status,
-        virtual_account_id
+        virtual_account_id,
+        expired_at
     )
-VALUES ($1, $2, $3)
-RETURNING id, customer_id, status, virtual_account_id, created_at
+VALUES ($1, $2, $3, $4, $5)
+RETURNING id, customer_id, amount, status, virtual_account_id, issued_at, expired_at, created_at
 `
 
 type CreateOrderParams struct {
-	CustomerID       int64  `json:"customer_id"`
-	Status           string `json:"status"`
-	VirtualAccountID int64  `json:"virtual_account_id"`
+	CustomerID       int64     `json:"customer_id"`
+	Amount           int64     `json:"amount"`
+	Status           string    `json:"status"`
+	VirtualAccountID int64     `json:"virtual_account_id"`
+	ExpiredAt        time.Time `json:"expired_at"`
 }
 
 func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) (Order, error) {
-	row := q.db.QueryRowContext(ctx, createOrder, arg.CustomerID, arg.Status, arg.VirtualAccountID)
+	row := q.db.QueryRowContext(ctx, createOrder,
+		arg.CustomerID,
+		arg.Amount,
+		arg.Status,
+		arg.VirtualAccountID,
+		arg.ExpiredAt,
+	)
 	var i Order
 	err := row.Scan(
 		&i.ID,
 		&i.CustomerID,
+		&i.Amount,
 		&i.Status,
 		&i.VirtualAccountID,
+		&i.IssuedAt,
+		&i.ExpiredAt,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const getOrder = `-- name: GetOrder :one
+
+SELECT id, customer_id, amount, status, virtual_account_id, issued_at, expired_at, created_at FROM orders WHERE id = $1 LIMIT 1
+`
+
+func (q *Queries) GetOrder(ctx context.Context, id int64) (Order, error) {
+	row := q.db.QueryRowContext(ctx, getOrder, id)
+	var i Order
+	err := row.Scan(
+		&i.ID,
+		&i.CustomerID,
+		&i.Amount,
+		&i.Status,
+		&i.VirtualAccountID,
+		&i.IssuedAt,
+		&i.ExpiredAt,
 		&i.CreatedAt,
 	)
 	return i, err
@@ -42,7 +77,7 @@ func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) (Order
 
 const listOrderByCustomerId = `-- name: ListOrderByCustomerId :many
 
-SELECT id, customer_id, status, virtual_account_id, created_at FROM orders WHERE customer_id = $1 LIMIT $2 OFFSET $3
+SELECT id, customer_id, amount, status, virtual_account_id, issued_at, expired_at, created_at FROM orders WHERE customer_id = $1 LIMIT $2 OFFSET $3
 `
 
 type ListOrderByCustomerIdParams struct {
@@ -63,8 +98,11 @@ func (q *Queries) ListOrderByCustomerId(ctx context.Context, arg ListOrderByCust
 		if err := rows.Scan(
 			&i.ID,
 			&i.CustomerID,
+			&i.Amount,
 			&i.Status,
 			&i.VirtualAccountID,
+			&i.IssuedAt,
+			&i.ExpiredAt,
 			&i.CreatedAt,
 		); err != nil {
 			return nil, err
@@ -78,4 +116,30 @@ func (q *Queries) ListOrderByCustomerId(ctx context.Context, arg ListOrderByCust
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateOrder = `-- name: UpdateOrder :one
+
+UPDATE orders SET status = $1 WHERE id = $2 RETURNING id, customer_id, amount, status, virtual_account_id, issued_at, expired_at, created_at
+`
+
+type UpdateOrderParams struct {
+	Status string `json:"status"`
+	ID     int64  `json:"id"`
+}
+
+func (q *Queries) UpdateOrder(ctx context.Context, arg UpdateOrderParams) (Order, error) {
+	row := q.db.QueryRowContext(ctx, updateOrder, arg.Status, arg.ID)
+	var i Order
+	err := row.Scan(
+		&i.ID,
+		&i.CustomerID,
+		&i.Amount,
+		&i.Status,
+		&i.VirtualAccountID,
+		&i.IssuedAt,
+		&i.ExpiredAt,
+		&i.CreatedAt,
+	)
+	return i, err
 }

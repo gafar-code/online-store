@@ -14,25 +14,33 @@ const createOrderItem = `-- name: CreateOrderItem :one
 INSERT INTO
     order_items (
         product_id,
+        product_price,
         qty,
         order_id
     )
-VALUES ($1, $2, $3)
-RETURNING id, product_id, qty, order_id, created_at
+VALUES ($1, $2, $3, $4)
+RETURNING id, product_id, product_price, qty, order_id, created_at
 `
 
 type CreateOrderItemParams struct {
-	ProductID int64 `json:"product_id"`
-	Qty       int64 `json:"qty"`
-	OrderID   int64 `json:"order_id"`
+	ProductID    int64 `json:"product_id"`
+	ProductPrice int64 `json:"product_price"`
+	Qty          int64 `json:"qty"`
+	OrderID      int64 `json:"order_id"`
 }
 
 func (q *Queries) CreateOrderItem(ctx context.Context, arg CreateOrderItemParams) (OrderItem, error) {
-	row := q.db.QueryRowContext(ctx, createOrderItem, arg.ProductID, arg.Qty, arg.OrderID)
+	row := q.db.QueryRowContext(ctx, createOrderItem,
+		arg.ProductID,
+		arg.ProductPrice,
+		arg.Qty,
+		arg.OrderID,
+	)
 	var i OrderItem
 	err := row.Scan(
 		&i.ID,
 		&i.ProductID,
+		&i.ProductPrice,
 		&i.Qty,
 		&i.OrderID,
 		&i.CreatedAt,
@@ -42,7 +50,7 @@ func (q *Queries) CreateOrderItem(ctx context.Context, arg CreateOrderItemParams
 
 const listOrderItemByOrderId = `-- name: ListOrderItemByOrderId :many
 
-SELECT id, product_id, qty, order_id, created_at FROM order_items WHERE order_id = $1 LIMIT $2 OFFSET $3
+SELECT id, product_id, product_price, qty, order_id, created_at FROM order_items WHERE order_id = $1 LIMIT $2 OFFSET $3
 `
 
 type ListOrderItemByOrderIdParams struct {
@@ -63,6 +71,7 @@ func (q *Queries) ListOrderItemByOrderId(ctx context.Context, arg ListOrderItemB
 		if err := rows.Scan(
 			&i.ID,
 			&i.ProductID,
+			&i.ProductPrice,
 			&i.Qty,
 			&i.OrderID,
 			&i.CreatedAt,

@@ -115,19 +115,26 @@ type BulkDeleteCartParams struct {
 
 // AddOrderJSONBody defines parameters for AddOrder.
 type AddOrderJSONBody struct {
+	Amount   *int `json:"amount,omitempty"`
 	Products *[]struct {
-		ProductId *int `json:"product_id,omitempty"`
-		Qty       *int `json:"qty,omitempty"`
+		ProductId    *int `json:"product_id,omitempty"`
+		ProductPrice *int `json:"product_price,omitempty"`
+		Qty          *int `json:"qty,omitempty"`
 	} `json:"products,omitempty"`
 	VirtualAccountId int `json:"virtual_account_id"`
 }
 
-// UpdatePaymentJSONBody defines parameters for UpdatePayment.
-type UpdatePaymentJSONBody struct {
-	ImageUrl         *string `json:"image_url,omitempty"`
-	Name             *string `json:"name,omitempty"`
-	RekeningNumber   *int    `json:"rekening_number,omitempty"`
-	VirtualAccountId int     `json:"virtual_account_id"`
+// AddProofPaymentJSONBody defines parameters for AddProofPayment.
+type AddProofPaymentJSONBody struct {
+	ImageUrl       string `json:"image_url"`
+	Name           string `json:"name"`
+	OrderId        int    `json:"order_id"`
+	RekeningNumber int    `json:"rekening_number"`
+}
+
+// UpdateOrderProofParams defines parameters for UpdateOrderProof.
+type UpdateOrderProofParams struct {
+	OrderId int `form:"order_id" json:"order_id"`
 }
 
 // ListProductParams defines parameters for ListProduct.
@@ -163,5 +170,5 @@ type AddToCartJSONRequestBody AddToCartJSONBody
 // AddOrderJSONRequestBody defines body for AddOrder for application/json ContentType.
 type AddOrderJSONRequestBody AddOrderJSONBody
 
-// UpdatePaymentJSONRequestBody defines body for UpdatePayment for application/json ContentType.
-type UpdatePaymentJSONRequestBody UpdatePaymentJSONBody
+// AddProofPaymentJSONRequestBody defines body for AddProofPayment for application/json ContentType.
+type AddProofPaymentJSONRequestBody AddProofPaymentJSONBody

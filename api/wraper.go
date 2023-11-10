@@ -40,11 +40,18 @@ func (wraper *ServerWraper) BulkDeleteCart(c *gin.Context, params BulkDeleteCart
 
 // (POST /order)
 func (wraper *ServerWraper) AddOrder(c *gin.Context) {
-
+	wraper.server.AddOrder(c)
 }
 
 // (PUT /order/{id})
-func (wraper *ServerWraper) UpdatePayment(c *gin.Context, id int) {}
+func (wraper *ServerWraper) AddProofPayment(c *gin.Context) {
+	wraper.server.AddProofPayment(c)
+}
+
+// (PUT /order/proof)
+func (wraper *ServerWraper) UpdateOrderProof(c *gin.Context, params UpdateOrderProofParams) {
+	wraper.server.UpdateOrderProof(c)
+}
 
 // (GET /product)
 func (wraper *ServerWraper) ListProduct(c *gin.Context, params ListProductParams) {

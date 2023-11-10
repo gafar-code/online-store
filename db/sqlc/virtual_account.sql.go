@@ -17,8 +17,7 @@ INSERT INTO
         description,
         rekening_number
     )
-VALUES ($1, $2, $3)
-RETURNING id, name, description, rekening_number, created_at
+VALUES ($1, $2, $3) RETURNING id, name, description, rekening_number, created_at
 `
 
 type CreateVirtualAccountParams struct {
@@ -29,6 +28,24 @@ type CreateVirtualAccountParams struct {
 
 func (q *Queries) CreateVirtualAccount(ctx context.Context, arg CreateVirtualAccountParams) (VirtualAccount, error) {
 	row := q.db.QueryRowContext(ctx, createVirtualAccount, arg.Name, arg.Description, arg.RekeningNumber)
+	var i VirtualAccount
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Description,
+		&i.RekeningNumber,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const getVirtualAccount = `-- name: GetVirtualAccount :one
+
+SELECT id, name, description, rekening_number, created_at FROM virtual_accounts WHERE id = $1 LIMIT 1
+`
+
+func (q *Queries) GetVirtualAccount(ctx context.Context, id int64) (VirtualAccount, error) {
+	row := q.db.QueryRowContext(ctx, getVirtualAccount, id)
 	var i VirtualAccount
 	err := row.Scan(
 		&i.ID,

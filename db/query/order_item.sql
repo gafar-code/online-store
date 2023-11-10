@@ -3,10 +3,11 @@
 INSERT INTO
     order_items (
         product_id,
+        product_price,
         qty,
         order_id
     )
-VALUES ($1, $2, $3)
+VALUES ($1, $2, $3, $4)
 RETURNING *;
 
 -- name: ListOrderItemByOrderId :many

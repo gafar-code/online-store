@@ -612,6 +612,9 @@ paths:
                 virtual_account_id:
                   type: integer
                   example: 1
+                amount:
+                  type: integer
+                  example: 200000
                 products:
                   type: array
                   items:
@@ -620,6 +623,9 @@ paths:
                       product_id:
                         type: integer
                         example: 3
+                      product_price:
+                        type: integer
+                        example: 50000
                       qty:
                         type: integer
                         example: 25
@@ -662,28 +668,20 @@ paths:
                     example: "Checkout Failed" 
 
 
-  /order/{id}:
-      put:
+  /order/proof:
+      post:
         tags:
           - "order"
-        operationId: UpdatePayment
+        operationId: AddProofPayment
         security:
           - BearerAuth: []
-        parameters:
-        - in: path
-          name: id
-          description: "Order ID that you want to UpdatePayment"
-          required: true
-          schema:
-            type: integer
-            example: 1
         requestBody:
           content:
             "application/json":
               schema:
                 type: object
                 properties:
-                  virtual_account_id:
+                  order_id:
                     type: integer
                     example: 1
                   name:
@@ -695,10 +693,60 @@ paths:
                   image_url:
                     type: string
                     example: "https://image.jpg"
-                        
                 required:
+                  - order_id
                   - customer_id
-                  - virtual_account_id
+                  - name
+                  - rekening_number
+                  - image_url
+
+        responses:
+          "200":
+            description: Submit Success
+            content:
+              "application/json":
+                schema:
+                  type: object
+                  properties:
+                    code:
+                      type: integer
+                      format: int32
+                      example: 200
+                    message:
+                      type: string
+                      example: "Submit Success"
+                    data:
+                      $ref: "#/components/schemas/Order"
+
+                      
+          "500":
+            description: Checkout Failed
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    code:
+                      type: integer
+                      format: int32
+                      example: 500
+                    message:
+                      type: string
+                      example: "Checkout Failed" 
+      put:
+        tags:
+          - "order"
+        operationId: UpdateOrderProof
+        security:
+          - BearerAuth: []
+        parameters:
+          - in: query
+            name: order_id
+            required: true
+            schema:
+              type: integer
+              example: 1
+
         responses:
           "200":
             description: Submit Success

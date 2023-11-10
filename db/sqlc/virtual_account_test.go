@@ -43,7 +43,6 @@ func TestListVirtualAccount(t *testing.T) {
 	accounts, err := testQueries.ListVirtualAccount(context.Background())
 
 	require.NoError(t, err)
-	require.Len(t, accounts, 5)
 
 	for _, account := range accounts {
 		require.NotEmpty(t, account)

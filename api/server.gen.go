@@ -35,8 +35,11 @@ type ServerInterface interface {
 	// (POST /order)
 	AddOrder(c *gin.Context)
 
-	// (PUT /order/{id})
-	UpdatePayment(c *gin.Context, id int)
+	// (POST /order/proof)
+	AddProofPayment(c *gin.Context)
+
+	// (PUT /order/proof)
+	UpdateOrderProof(c *gin.Context, params UpdateOrderProofParams)
 
 	// (GET /product)
 	ListProduct(c *gin.Context, params ListProductParams)
@@ -236,19 +239,8 @@ func (siw *ServerInterfaceWrapper) AddOrder(c *gin.Context) {
 	siw.Handler.AddOrder(c)
 }
 
-// UpdatePayment operation middleware
-func (siw *ServerInterfaceWrapper) UpdatePayment(c *gin.Context) {
-
-	var err error
-
-	// ------------- Path parameter "id" -------------
-	var id int
-
-	err = runtime.BindStyledParameter("simple", false, "id", c.Param("id"), &id)
-	if err != nil {
-		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter id: %w", err), http.StatusBadRequest)
-		return
-	}
+// AddProofPayment operation middleware
+func (siw *ServerInterfaceWrapper) AddProofPayment(c *gin.Context) {
 
 	c.Set(BearerAuthScopes, []string{})
 
@@ -259,7 +251,42 @@ func (siw *ServerInterfaceWrapper) UpdatePayment(c *gin.Context) {
 		}
 	}
 
-	siw.Handler.UpdatePayment(c, id)
+	siw.Handler.AddProofPayment(c)
+}
+
+// UpdateOrderProof operation middleware
+func (siw *ServerInterfaceWrapper) UpdateOrderProof(c *gin.Context) {
+
+	var err error
+
+	c.Set(BearerAuthScopes, []string{})
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params UpdateOrderProofParams
+
+	// ------------- Required query parameter "order_id" -------------
+
+	if paramValue := c.Query("order_id"); paramValue != "" {
+
+	} else {
+		siw.ErrorHandler(c, fmt.Errorf("Query argument order_id is required, but not found"), http.StatusBadRequest)
+		return
+	}
+
+	err = runtime.BindQueryParameter("form", true, true, "order_id", c.Request.URL.Query(), &params.OrderId)
+	if err != nil {
+		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter order_id: %w", err), http.StatusBadRequest)
+		return
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+		if c.IsAborted() {
+			return
+		}
+	}
+
+	siw.Handler.UpdateOrderProof(c, params)
 }
 
 // ListProduct operation middleware
@@ -445,7 +472,8 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 	router.POST(options.BaseURL+"/cart", wrapper.AddToCart)
 	router.DELETE(options.BaseURL+"/cart/bulk", wrapper.BulkDeleteCart)
 	router.POST(options.BaseURL+"/order", wrapper.AddOrder)
-	router.PUT(options.BaseURL+"/order/:id", wrapper.UpdatePayment)
+	router.POST(options.BaseURL+"/order/proof", wrapper.AddProofPayment)
+	router.PUT(options.BaseURL+"/order/proof", wrapper.UpdateOrderProof)
 	router.GET(options.BaseURL+"/product", wrapper.ListProduct)
 	router.GET(options.BaseURL+"/product/:id", wrapper.GetProductDetail)
 	router.GET(options.BaseURL+"/transaction", wrapper.ListOrders)

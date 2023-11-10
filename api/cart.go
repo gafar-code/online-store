@@ -2,7 +2,6 @@ package api
 
 import (
 	"database/sql"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -50,19 +49,11 @@ func getCustomerByToken(server *Server, c *gin.Context) (customer db.Customer, e
 	authPayload := c.MustGet(authorizationPayloadKey).(*token.Payload)
 	err = authPayload.Valid()
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, Response{
-			Code:    http.StatusUnauthorized,
-			Message: err.Error(),
-		})
 		return
 	}
 
 	customer, err = server.q.GetCustomerByEmail(c, authPayload.Username)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, Response{
-			Code:    http.StatusInternalServerError,
-			Message: err.Error(),
-		})
 		return
 	}
 
@@ -171,7 +162,6 @@ func (server *Server) DeleteProductFromCart(c *gin.Context) {
 	}
 
 	cart, err := server.q.GetExistingCart(c, arg)
-	fmt.Println(err)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, Response{
 			Code:    http.StatusInternalServerError,

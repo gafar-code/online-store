@@ -42,16 +42,29 @@ CREATE TABLE "carts" (
 CREATE TABLE "orders" (
   "id" bigserial PRIMARY KEY,
   "customer_id" bigint NOT NULL,
+  "amount" bigint NOT NULL,
   "status" varchar NOT NULL,
   "virtual_account_id" bigint NOT NULL,
+  "issued_at" timestamptz NOT NULL DEFAULT (now()),
+  "expired_at" timestamptz NOT NULL DEFAULT (now()),
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );
 
 CREATE TABLE "order_items" (
   "id" bigserial PRIMARY KEY,
   "product_id" bigint NOT NULL,
+  "product_price" bigint NOT NULL,
   "qty" bigint NOT NULL DEFAULT '1',
   "order_id" bigint NOT NULL,
+  "created_at" timestamptz NOT NULL DEFAULT (now())
+);
+
+CREATE TABLE "order_proof" (
+  "id" bigserial PRIMARY KEY,
+  "order_id" bigint NOT NULL,
+  "name_holder" varchar NOT NULL,
+  "rekening_number" bigint NOT NULL,
+  "image_url" varchar NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );
 
@@ -95,6 +108,8 @@ ALTER TABLE "orders" ADD FOREIGN KEY ("virtual_account_id") REFERENCES "virtual_
 ALTER TABLE "order_items" ADD FOREIGN KEY ("product_id") REFERENCES "products" ("id");
 
 ALTER TABLE "order_items" ADD FOREIGN KEY ("order_id") REFERENCES "orders" ("id");
+
+ALTER TABLE "order_proof" ADD FOREIGN KEY ("order_id") REFERENCES "orders" ("id");
 
 ALTER TABLE "transactions" ADD FOREIGN KEY ("customer_id") REFERENCES "customers" ("id");
 
