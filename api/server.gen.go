@@ -48,7 +48,7 @@ type ServerInterface interface {
 	GetProductDetail(c *gin.Context, id int)
 
 	// (GET /transaction)
-	ListOrders(c *gin.Context, params ListOrdersParams)
+	ListTransaction(c *gin.Context, params ListTransactionParams)
 
 	// (GET /virtual-account)
 	ListVirtualAccount(c *gin.Context)
@@ -373,15 +373,15 @@ func (siw *ServerInterfaceWrapper) GetProductDetail(c *gin.Context) {
 	siw.Handler.GetProductDetail(c, id)
 }
 
-// ListOrders operation middleware
-func (siw *ServerInterfaceWrapper) ListOrders(c *gin.Context) {
+// ListTransaction operation middleware
+func (siw *ServerInterfaceWrapper) ListTransaction(c *gin.Context) {
 
 	var err error
 
 	c.Set(BearerAuthScopes, []string{})
 
 	// Parameter object where we will unmarshal all parameters from the context
-	var params ListOrdersParams
+	var params ListTransactionParams
 
 	// ------------- Required query parameter "page" -------------
 
@@ -420,7 +420,7 @@ func (siw *ServerInterfaceWrapper) ListOrders(c *gin.Context) {
 		}
 	}
 
-	siw.Handler.ListOrders(c, params)
+	siw.Handler.ListTransaction(c, params)
 }
 
 // ListVirtualAccount operation middleware
@@ -476,6 +476,6 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 	router.PUT(options.BaseURL+"/order/proof", wrapper.UpdateOrderProof)
 	router.GET(options.BaseURL+"/product", wrapper.ListProduct)
 	router.GET(options.BaseURL+"/product/:id", wrapper.GetProductDetail)
-	router.GET(options.BaseURL+"/transaction", wrapper.ListOrders)
+	router.GET(options.BaseURL+"/transaction", wrapper.ListTransaction)
 	router.GET(options.BaseURL+"/virtual-account", wrapper.ListVirtualAccount)
 }

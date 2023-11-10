@@ -24,7 +24,7 @@ type productListRes struct {
 	Items []db.Product `json:"items"`
 }
 
-func (server *Server) ListProduct(c *gin.Context) {
+func (server *Server) ListProduct(c *gin.Context, params ListProductParams) {
 	var req listProductReq
 	if err := c.ShouldBindQuery(&req); err != nil {
 		c.JSON(http.StatusBadRequest, Response{
@@ -77,6 +77,7 @@ func (server *Server) ListProduct(c *gin.Context) {
 			Code:    http.StatusInternalServerError,
 			Message: err.Error(),
 		})
+		return
 	}
 
 	c.JSON(http.StatusOK, ResponseData{
@@ -89,7 +90,7 @@ func (server *Server) ListProduct(c *gin.Context) {
 		},
 	})
 }
-func (server *Server) GetProductDetail(c *gin.Context) {
+func (server *Server) GetProductDetail(c *gin.Context, id int) {
 	var req productDetailReq
 	if err := c.ShouldBindUri(&req); err != nil {
 		c.JSON(http.StatusBadRequest, Response{
@@ -106,6 +107,7 @@ func (server *Server) GetProductDetail(c *gin.Context) {
 			Code:    http.StatusInternalServerError,
 			Message: err.Error(),
 		})
+		return
 	}
 
 	c.JSON(http.StatusOK, ResponseData{

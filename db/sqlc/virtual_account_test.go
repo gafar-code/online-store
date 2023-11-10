@@ -15,26 +15,39 @@ func createRandomVirtualAccount(t *testing.T) VirtualAccount {
 		RekeningNumber: util.RandomInt(1000000000, 9999999999),
 	}
 
-	customer, err := testQueries.CreateVirtualAccount(context.Background(), arg)
+	va, err := testQueries.CreateVirtualAccount(context.Background(), arg)
 
 	require.NoError(t, err)
-	require.NotEmpty(t, customer)
+	require.NotEmpty(t, va)
 
-	require.Equal(t, arg.Name, customer.Name)
-	require.Equal(t, arg.Name, customer.Name)
-	require.Equal(t, arg.Description, customer.Description)
-	require.Equal(t, arg.RekeningNumber, customer.RekeningNumber)
+	require.Equal(t, arg.Name, va.Name)
+	require.Equal(t, arg.Name, va.Name)
+	require.Equal(t, arg.Description, va.Description)
+	require.Equal(t, arg.RekeningNumber, va.RekeningNumber)
 
-	require.NotZero(t, customer.ID)
-	require.NotZero(t, customer.CreatedAt)
+	require.NotZero(t, va.ID)
+	require.NotZero(t, va.CreatedAt)
 
-	return customer
+	return va
 }
 
 func TestCreateVirtualAccount(t *testing.T) {
 	createRandomVirtualAccount(t)
 }
 
+func TestListGetVirtualAccount(t *testing.T) {
+	for i := 0; i < 10; i++ {
+	}
+	acc1 := createRandomVirtualAccount(t)
+	acc2, err := testQueries.GetVirtualAccount(context.Background(), acc1.ID)
+
+	require.NoError(t, err)
+	require.NotEmpty(t, acc2)
+	require.Equal(t, acc1.ID, acc2.ID)
+	require.Equal(t, acc1.Name, acc2.Name)
+	require.Equal(t, acc1.Description, acc2.Description)
+	require.Equal(t, acc1.RekeningNumber, acc2.RekeningNumber)
+}
 func TestListVirtualAccount(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		createRandomVirtualAccount(t)

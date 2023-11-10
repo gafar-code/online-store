@@ -6,7 +6,6 @@ import (
 	"time"
 
 	db "github.com/gafar-code/online-store/db/sqlc"
-	"github.com/gafar-code/online-store/token"
 	"github.com/gafar-code/online-store/util"
 	"github.com/gin-gonic/gin"
 )
@@ -21,11 +20,6 @@ type deleteCartReq struct {
 
 type bulkDeleteCartReq struct {
 	ProductIDs []int64 `form:"product_ids" binding:"required"`
-}
-
-type listCartReq struct {
-	Page int32 `form:"page" binding:"required"`
-	Size int32 `form:"size" binding:"required"`
 }
 
 type listCartRes struct {
@@ -45,21 +39,6 @@ type cartItemRes struct {
 	CreatedAt   time.Time `json:"created_at"`
 }
 
-func getCustomerByToken(server *Server, c *gin.Context) (customer db.Customer, err error) {
-	authPayload := c.MustGet(authorizationPayloadKey).(*token.Payload)
-	err = authPayload.Valid()
-	if err != nil {
-		return
-	}
-
-	customer, err = server.q.GetCustomerByEmail(c, authPayload.Username)
-	if err != nil {
-		return
-	}
-
-	return
-}
-
 func (server *Server) AddToCart(c *gin.Context) {
 	var req addCartReq
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -72,8 +51,8 @@ func (server *Server) AddToCart(c *gin.Context) {
 
 	customer, err := getCustomerByToken(server, c)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, Response{
-			Code:    http.StatusInternalServerError,
+		c.JSON(http.StatusUnauthorized, Response{
+			Code:    http.StatusUnauthorized,
 			Message: err.Error(),
 		})
 		return
@@ -85,32 +64,30 @@ func (server *Server) AddToCart(c *gin.Context) {
 	}
 
 	existing, err := server.q.GetExistingCart(c, arg)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			createArg := db.CreateCartParams{
-				CustomerID: customer.ID,
-				ProductID:  req.ProductID,
-				Qty:        1,
-			}
+	if err != nil && err == sql.ErrNoRows {
+		createArg := db.CreateCartParams{
+			CustomerID: customer.ID,
+			ProductID:  req.ProductID,
+			Qty:        1,
+		}
 
-			cart, err := server.q.CreateCart(c, createArg)
+		cart, err := server.q.CreateCart(c, createArg)
 
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, Response{
-					Code:    http.StatusInternalServerError,
-					Message: err.Error(),
-				})
-				return
-			}
-
-			c.JSON(http.StatusCreated, ResponseData{
-				Code:    http.StatusCreated,
-				Message: "Success",
-				Data:    cart,
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, Response{
+				Code:    http.StatusInternalServerError,
+				Message: err.Error(),
 			})
-
 			return
 		}
+
+		c.JSON(http.StatusCreated, ResponseData{
+			Code:    http.StatusCreated,
+			Message: "Success",
+			Data:    cart,
+		})
+
+		return
 	}
 
 	if !util.IsEmpty(existing) {
@@ -133,11 +110,12 @@ func (server *Server) AddToCart(c *gin.Context) {
 			Message: "Success",
 			Data:    cart,
 		})
+		return
 	}
 
 }
 
-func (server *Server) DeleteProductFromCart(c *gin.Context) {
+func (server *Server) DeleteProductFromCart(c *gin.Context, params DeleteProductFromCartParams) {
 	var req deleteCartReq
 	if err := c.ShouldBindQuery(&req); err != nil {
 		c.JSON(http.StatusBadRequest, Response{
@@ -149,8 +127,8 @@ func (server *Server) DeleteProductFromCart(c *gin.Context) {
 
 	customer, err := getCustomerByToken(server, c)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, Response{
-			Code:    http.StatusInternalServerError,
+		c.JSON(http.StatusUnauthorized, Response{
+			Code:    http.StatusUnauthorized,
 			Message: err.Error(),
 		})
 		return
@@ -209,7 +187,7 @@ func (server *Server) DeleteProductFromCart(c *gin.Context) {
 
 }
 
-func (server *Server) BulkDeleteCart(c *gin.Context) {
+func (server *Server) BulkDeleteCart(c *gin.Context, params BulkDeleteCartParams) {
 	var req bulkDeleteCartReq
 	if err := c.ShouldBindQuery(&req); err != nil {
 		c.JSON(http.StatusBadRequest, Response{
@@ -236,8 +214,8 @@ func (server *Server) BulkDeleteCart(c *gin.Context) {
 	})
 }
 
-func (server *Server) GetCart(c *gin.Context) {
-	var req listCartReq
+func (server *Server) GetCart(c *gin.Context, params GetCartParams) {
+	var req PaginationReq
 	if err := c.ShouldBindQuery(&req); err != nil {
 		c.JSON(http.StatusBadRequest, Response{
 			Code:    http.StatusBadRequest,
@@ -248,8 +226,8 @@ func (server *Server) GetCart(c *gin.Context) {
 
 	customer, err := getCustomerByToken(server, c)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, Response{
-			Code:    http.StatusInternalServerError,
+		c.JSON(http.StatusUnauthorized, Response{
+			Code:    http.StatusUnauthorized,
 			Message: err.Error(),
 		})
 		return

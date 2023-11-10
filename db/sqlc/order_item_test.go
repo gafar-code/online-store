@@ -12,9 +12,14 @@ func createRandomOrderItem(t *testing.T) OrderItem {
 	order := createRandomOrder(t)
 
 	arg := CreateOrderItemParams{
-		ProductID: prod.ID,
-		Qty:       1,
-		OrderID:   order.ID,
+		CategoryID:  prod.CategoryID,
+		Name:        prod.Name,
+		ImageUrl:    prod.ImageUrl,
+		Description: prod.Description,
+		Price:       prod.Price,
+		Qty:         1,
+		ProductID:   prod.ID,
+		OrderID:     order.ID,
 	}
 
 	orderItem, err := testQueries.CreateOrderItem(context.Background(), arg)
@@ -45,9 +50,14 @@ func TestListOrderItemByOrderId(t *testing.T) {
 	for i := 0; i < length; i++ {
 
 		arg := CreateOrderItemParams{
-			ProductID: product.ID,
-			Qty:       1,
-			OrderID:   order.ID,
+			CategoryID:  product.CategoryID,
+			Name:        product.Name,
+			ImageUrl:    product.ImageUrl,
+			Description: product.Description,
+			Price:       product.Price,
+			Qty:         1,
+			ProductID:   product.ID,
+			OrderID:     order.ID,
 		}
 
 		order, err := testQueries.CreateOrderItem(context.Background(), arg)
@@ -57,13 +67,7 @@ func TestListOrderItemByOrderId(t *testing.T) {
 		require.Equal(t, arg.ProductID, order.ProductID)
 	}
 
-	arg := ListOrderItemByOrderIdParams{
-		OrderID: order.ID,
-		Limit:   10,
-		Offset:  0,
-	}
-
-	orders, err := testQueries.ListOrderItemByOrderId(context.Background(), arg)
+	orders, err := testQueries.ListOrderItemByOrderId(context.Background(), order.ID)
 
 	require.NoError(t, err)
 	require.NotEmpty(t, orders)

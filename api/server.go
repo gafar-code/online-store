@@ -1,6 +1,8 @@
 package api
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 
 	db "github.com/gafar-code/online-store/db/sqlc"
@@ -28,6 +30,11 @@ type Response struct {
 	Message string `json:"message"`
 }
 
+type PaginationReq struct {
+	Page int32 `form:"page" binding:"required,min=1"`
+	Size int32 `form:"size" binding:"required"`
+}
+
 var tokenMaker token.Maker
 
 func errorHandler(c *gin.Context, err error, code int) {
@@ -36,7 +43,27 @@ func errorHandler(c *gin.Context, err error, code int) {
 			Code:    int32(code),
 			Message: err.Error(),
 		})
+		return
 	}
+}
+
+func getCustomerByToken(server *Server, c *gin.Context) (customer db.Customer, err error) {
+	authPayload := c.MustGet(authorizationPayloadKey).(*token.Payload)
+	err = authPayload.Valid()
+	if err != nil {
+		return
+	}
+
+	customer, err = server.q.GetCustomerByEmail(c, authPayload.Username)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			err = errors.New("invalid token")
+			return
+		}
+		return
+	}
+
+	return
 }
 
 func NewServer(config util.Config, q *db.Queries) (server *Server, err error) {
@@ -65,13 +92,9 @@ func NewServer(config util.Config, q *db.Queries) (server *Server, err error) {
 		AuthMiddleware,
 	}
 
-	baseUrl := "/api/v1"
-	wrapServer := &ServerWraper{
-		server: server,
-	}
+	baseUrl := fmt.Sprintf("/api/%v", config.APIVersion)
 
-	// TODO: Change wrapServer to server
-	RegisterHandlersWithOptions(router, wrapServer, GinServerOptions{
+	RegisterHandlersWithOptions(router, server, GinServerOptions{
 		BaseURL:      baseUrl,
 		Middlewares:  middleware,
 		ErrorHandler: errorHandler,

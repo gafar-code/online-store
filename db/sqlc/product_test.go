@@ -59,6 +59,22 @@ func TestGetProduct(t *testing.T) {
 	require.Equal(t, prod1.Qty, prod2.Qty)
 	require.WithinDuration(t, prod1.CreatedAt, prod2.CreatedAt, time.Second)
 }
+func TestListProduct(t *testing.T) {
+	for i := 0; i < 10; i++ {
+		createRandomProduct(t)
+	}
+
+	arg := ListProductParams{
+		Limit:  10,
+		Offset: 0,
+	}
+	prod, err := testQueries.ListProduct(context.Background(), arg)
+
+	require.NoError(t, err)
+	require.NotEmpty(t, prod)
+
+	require.GreaterOrEqual(t, len(prod), 10)
+}
 func TestGetProductByCategoryId(t *testing.T) {
 	category := createRandomProductCategory(t)
 

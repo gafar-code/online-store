@@ -23,11 +23,9 @@ func createRandomCart(t *testing.T) Cart {
 
 	require.NoError(t, err)
 	require.NotEmpty(t, cart)
-
 	require.Equal(t, arg.CustomerID, cart.CustomerID)
 	require.Equal(t, arg.ProductID, cart.ProductID)
 	require.Equal(t, int64(1), cart.Qty)
-
 	require.NotZero(t, cart.ID)
 	require.NotZero(t, cart.CreatedAt)
 
@@ -81,6 +79,25 @@ func TestGetCart(t *testing.T) {
 	require.Equal(t, cart1.CustomerID, cart2.CustomerID)
 	require.Equal(t, cart1.ProductID, cart2.ProductID)
 	require.Equal(t, cart1.Qty, cart2.Qty)
+}
+
+func TestGetExistingCart(t *testing.T) {
+	cart1 := createRandomCart(t)
+
+	arg := GetExistingCartParams{
+		CustomerID: cart1.CustomerID,
+		ProductID:  cart1.ProductID,
+	}
+
+	cart2, err := testQueries.GetExistingCart(context.Background(), arg)
+
+	require.NoError(t, err)
+	require.NotEmpty(t, cart2)
+
+	require.Equal(t, cart1.CustomerID, cart2.CustomerID)
+	require.Equal(t, cart1.ProductID, cart2.ProductID)
+	require.Equal(t, cart1.Qty, cart2.Qty)
+
 }
 
 func TestDeleteCart(t *testing.T) {

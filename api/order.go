@@ -1,7 +1,10 @@
 package api
 
 import (
+	"fmt"
+	"mime/multipart"
 	"net/http"
+	"strconv"
 	"time"
 
 	db "github.com/gafar-code/online-store/db/sqlc"
@@ -13,11 +16,11 @@ const paymentExpired = 24 * time.Hour
 type addOrderReq struct {
 	VirtualAccountID int64          `json:"virtual_account_id" binding:"required"`
 	Amount           int64          `json:"amount" binding:"required"`
-	Products         []addOrderItem `json:"products" binding:"required"`
+	OrderItems       []addOrderItem `json:"products" binding:"required"`
 }
 
 type addOrderItem struct {
-	ProductId    int64 `json:"product_id" binding:"required"`
+	ProductID    int64 `json:"product_id" binding:"required"`
 	ProductPrice int64 `json:"product_price" binding:"required"`
 	Qty          int64 `json:"qty" binding:"required"`
 }
@@ -35,10 +38,10 @@ type addOrderRes struct {
 }
 
 type orderProofReq struct {
-	OrderID        int64  `json:"order_id"`
-	Name           string `json:"name"`
-	RekeningNumber int64  `json:"rekening_number"`
-	ImageUrl       string `json:"image_url"`
+	OrderID        int64                 `form:"order_id"`
+	Name           string                `form:"name"`
+	RekeningNumber int64                 `form:"rekening_number"`
+	Image          *multipart.FileHeader `form:"image"`
 }
 
 type updateOrderProofReq struct {
@@ -69,8 +72,8 @@ func (server *Server) AddOrder(c *gin.Context) {
 
 	customer, err := getCustomerByToken(server, c)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, Response{
-			Code:    http.StatusInternalServerError,
+		c.JSON(http.StatusUnauthorized, Response{
+			Code:    http.StatusUnauthorized,
 			Message: err.Error(),
 		})
 		return
@@ -93,15 +96,28 @@ func (server *Server) AddOrder(c *gin.Context) {
 		return
 	}
 
-	for _, item := range req.Products {
-		arg := db.CreateOrderItemParams{
-			OrderID:      order.ID,
-			ProductID:    item.ProductId,
-			ProductPrice: item.ProductPrice,
-			Qty:          item.Qty,
+	for _, item := range req.OrderItems {
+		prod, err := server.q.GetProductDetail(c, item.ProductID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, Response{
+				Code:    http.StatusInternalServerError,
+				Message: err.Error(),
+			})
+			return
 		}
 
-		_, err := server.q.CreateOrderItem(c, arg)
+		arg := db.CreateOrderItemParams{
+			CategoryID:  prod.CategoryID,
+			Name:        prod.Name,
+			ImageUrl:    prod.ImageUrl,
+			Description: prod.Description,
+			Price:       item.ProductPrice,
+			Qty:         item.Qty,
+			ProductID:   item.ProductID,
+			OrderID:     order.ID,
+		}
+
+		_, err = server.q.CreateOrderItem(c, arg)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, Response{
 				Code:    http.StatusInternalServerError,
@@ -141,7 +157,7 @@ func (server *Server) AddOrder(c *gin.Context) {
 
 func (server *Server) AddProofPayment(c *gin.Context) {
 	var req orderProofReq
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.ShouldBindQuery(&req); err != nil {
 		c.JSON(http.StatusBadRequest, Response{
 			Code:    http.StatusBadRequest,
 			Message: err.Error(),
@@ -149,14 +165,72 @@ func (server *Server) AddProofPayment(c *gin.Context) {
 		return
 	}
 
+	orderId, err := strconv.ParseInt(c.PostForm("order_id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, Response{
+			Code:    http.StatusBadRequest,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	rekeningNumb, err := strconv.ParseInt(c.PostForm("rekening_number"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, Response{
+			Code:    http.StatusBadRequest,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	req = orderProofReq{
+		OrderID:        orderId,
+		Name:           c.PostForm(req.Name),
+		RekeningNumber: rekeningNumb,
+		Image:          req.Image,
+	}
+
+	customer, err := getCustomerByToken(server, c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, Response{
+			Code:    http.StatusUnauthorized,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	file, err := c.FormFile("image")
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, Response{
+			Code:    http.StatusInternalServerError,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	fileName := fmt.Sprintf("%v_%d_%s", customer.Name, time.Now().UnixNano(), file.Filename)
+	filePath := "images/proofs/" + fileName
+
+	fmt.Println(c.PostForm("order_id"))
+
 	arg := db.CreateOrderProofParams{
 		OrderID:        req.OrderID,
 		NameHolder:     req.Name,
 		RekeningNumber: req.RekeningNumber,
-		ImageUrl:       req.ImageUrl,
+		ImageUrl:       filePath,
 	}
 
 	proof, err := server.q.CreateOrderProof(c, arg)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, Response{
+			Code:    http.StatusInternalServerError,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	err = c.SaveUploadedFile(file, filePath)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, Response{
 			Code:    http.StatusInternalServerError,
@@ -214,9 +288,9 @@ func (server *Server) AddProofPayment(c *gin.Context) {
 		Message: "Success",
 		Data:    result,
 	})
-
 }
-func (server *Server) UpdateOrderProof(c *gin.Context) {
+
+func (server *Server) UpdateOrderProof(c *gin.Context, params UpdateOrderProofParams) {
 	var req updateOrderProofReq
 	if err := c.ShouldBindQuery(&req); err != nil {
 		c.JSON(http.StatusBadRequest, Response{

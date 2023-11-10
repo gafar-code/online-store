@@ -38,12 +38,16 @@ type Order struct {
 }
 
 type OrderItem struct {
-	ID           int64     `json:"id"`
-	ProductID    int64     `json:"product_id"`
-	ProductPrice int64     `json:"product_price"`
-	Qty          int64     `json:"qty"`
-	OrderID      int64     `json:"order_id"`
-	CreatedAt    time.Time `json:"created_at"`
+	ID          int64     `json:"id"`
+	CategoryID  int64     `json:"category_id"`
+	Name        string    `json:"name"`
+	ImageUrl    string    `json:"image_url"`
+	Description string    `json:"description"`
+	Price       int64     `json:"price"`
+	Qty         int64     `json:"qty"`
+	ProductID   int64     `json:"product_id"`
+	OrderID     int64     `json:"order_id"`
+	CreatedAt   time.Time `json:"created_at"`
 }
 
 type OrderProof struct {

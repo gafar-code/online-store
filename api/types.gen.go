@@ -149,8 +149,8 @@ type ListProductParams struct {
 	CategoryId *int `form:"category_id,omitempty" json:"category_id,omitempty"`
 }
 
-// ListOrdersParams defines parameters for ListOrders.
-type ListOrdersParams struct {
+// ListTransactionParams defines parameters for ListTransaction.
+type ListTransactionParams struct {
 	// Page The page number you want to retrieve, starting from page 1
 	Page int `form:"page" json:"page"`
 

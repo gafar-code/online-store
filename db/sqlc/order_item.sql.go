@@ -13,35 +13,51 @@ const createOrderItem = `-- name: CreateOrderItem :one
 
 INSERT INTO
     order_items (
-        product_id,
-        product_price,
+        category_id,
+        name,
+        image_url,
+        description,
+        price,
         qty,
+        product_id,
         order_id
     )
-VALUES ($1, $2, $3, $4)
-RETURNING id, product_id, product_price, qty, order_id, created_at
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+RETURNING id, category_id, name, image_url, description, price, qty, product_id, order_id, created_at
 `
 
 type CreateOrderItemParams struct {
-	ProductID    int64 `json:"product_id"`
-	ProductPrice int64 `json:"product_price"`
-	Qty          int64 `json:"qty"`
-	OrderID      int64 `json:"order_id"`
+	CategoryID  int64  `json:"category_id"`
+	Name        string `json:"name"`
+	ImageUrl    string `json:"image_url"`
+	Description string `json:"description"`
+	Price       int64  `json:"price"`
+	Qty         int64  `json:"qty"`
+	ProductID   int64  `json:"product_id"`
+	OrderID     int64  `json:"order_id"`
 }
 
 func (q *Queries) CreateOrderItem(ctx context.Context, arg CreateOrderItemParams) (OrderItem, error) {
 	row := q.db.QueryRowContext(ctx, createOrderItem,
-		arg.ProductID,
-		arg.ProductPrice,
+		arg.CategoryID,
+		arg.Name,
+		arg.ImageUrl,
+		arg.Description,
+		arg.Price,
 		arg.Qty,
+		arg.ProductID,
 		arg.OrderID,
 	)
 	var i OrderItem
 	err := row.Scan(
 		&i.ID,
-		&i.ProductID,
-		&i.ProductPrice,
+		&i.CategoryID,
+		&i.Name,
+		&i.ImageUrl,
+		&i.Description,
+		&i.Price,
 		&i.Qty,
+		&i.ProductID,
 		&i.OrderID,
 		&i.CreatedAt,
 	)
@@ -50,17 +66,11 @@ func (q *Queries) CreateOrderItem(ctx context.Context, arg CreateOrderItemParams
 
 const listOrderItemByOrderId = `-- name: ListOrderItemByOrderId :many
 
-SELECT id, product_id, product_price, qty, order_id, created_at FROM order_items WHERE order_id = $1 LIMIT $2 OFFSET $3
+SELECT id, category_id, name, image_url, description, price, qty, product_id, order_id, created_at FROM order_items WHERE order_id = $1
 `
 
-type ListOrderItemByOrderIdParams struct {
-	OrderID int64 `json:"order_id"`
-	Limit   int32 `json:"limit"`
-	Offset  int32 `json:"offset"`
-}
-
-func (q *Queries) ListOrderItemByOrderId(ctx context.Context, arg ListOrderItemByOrderIdParams) ([]OrderItem, error) {
-	rows, err := q.db.QueryContext(ctx, listOrderItemByOrderId, arg.OrderID, arg.Limit, arg.Offset)
+func (q *Queries) ListOrderItemByOrderId(ctx context.Context, orderID int64) ([]OrderItem, error) {
+	rows, err := q.db.QueryContext(ctx, listOrderItemByOrderId, orderID)
 	if err != nil {
 		return nil, err
 	}
@@ -70,9 +80,13 @@ func (q *Queries) ListOrderItemByOrderId(ctx context.Context, arg ListOrderItemB
 		var i OrderItem
 		if err := rows.Scan(
 			&i.ID,
-			&i.ProductID,
-			&i.ProductPrice,
+			&i.CategoryID,
+			&i.Name,
+			&i.ImageUrl,
+			&i.Description,
+			&i.Price,
 			&i.Qty,
+			&i.ProductID,
 			&i.OrderID,
 			&i.CreatedAt,
 		); err != nil {

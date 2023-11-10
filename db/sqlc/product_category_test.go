@@ -11,16 +11,16 @@ import (
 func createRandomProductCategory(t *testing.T) ProductCategory {
 
 	name := util.RandomName()
-	customer, err := testQueries.CreateProductCategory(context.Background(), name)
+	category, err := testQueries.CreateProductCategory(context.Background(), name)
 
 	require.NoError(t, err)
-	require.NotEmpty(t, customer)
+	require.NotEmpty(t, category)
 
-	require.Equal(t, name, customer.Name)
+	require.Equal(t, name, category.Name)
 
-	require.NotZero(t, customer.ID)
+	require.NotZero(t, category.ID)
 
-	return customer
+	return category
 }
 
 func TestCreateProductCategory(t *testing.T) {

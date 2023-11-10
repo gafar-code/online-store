@@ -52,9 +52,13 @@ CREATE TABLE "orders" (
 
 CREATE TABLE "order_items" (
   "id" bigserial PRIMARY KEY,
-  "product_id" bigint NOT NULL,
-  "product_price" bigint NOT NULL,
+  "category_id" bigint NOT NULL,
+  "name" varchar NOT NULL,
+  "image_url" varchar NOT NULL,
+  "description" varchar NOT NULL,
+  "price" bigint NOT NULL,
   "qty" bigint NOT NULL DEFAULT '1',
+  "product_id" bigint NOT NULL,
   "order_id" bigint NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );
@@ -104,6 +108,8 @@ ALTER TABLE "carts" ADD FOREIGN KEY ("product_id") REFERENCES "products" ("id");
 ALTER TABLE "orders" ADD FOREIGN KEY ("customer_id") REFERENCES "customers" ("id");
 
 ALTER TABLE "orders" ADD FOREIGN KEY ("virtual_account_id") REFERENCES "virtual_accounts" ("id");
+
+ALTER TABLE "order_items" ADD FOREIGN KEY ("category_id") REFERENCES "product_categories" ("id");
 
 ALTER TABLE "order_items" ADD FOREIGN KEY ("product_id") REFERENCES "products" ("id");
 
