@@ -270,7 +270,7 @@ paths:
                     $ref: "#/components/schemas/Customer"
         "500":
           description: <font size=+1>Response gagal terdiri dari <code>code</code> dan <code>message</code><br/>
-            <b>code</b> mengikuti standar http code, <b>message</b> sesuai error yang terjadi.<br>
+            <code>code</code> mengikuti standar http code, <code>message</code> sesuai error yang terjadi.<br>
           content:
             application/json:
               schema:
@@ -356,7 +356,7 @@ paths:
                     $ref: "#/components/schemas/Customer"
         "500":
           description: <font size=+1>Response gagal terdiri dari <code>code</code> dan <code>message</code><br/>
-            <b>code</b> mengikuti standar http code, <b>message</b> sesuai error yang terjadi.<br>
+            <code>code</code> mengikuti standar http code, <code>message</code> sesuai error yang terjadi.<br>
           content:
             application/json:
               schema:
@@ -375,6 +375,24 @@ paths:
     get:
       tags:
         - "product"
+      description: <font size=+1><p>Menampilkan seluruh data produk yang tersedia. menerapkan pagination dalam pengambilan data, wajib mengirim parameter <code>page</code>, <code>size</code> dan opsional <code>category_id</code>
+  
+        <pre><code>
+        Page       -> page (integer)<br/>
+        Size       -> size (integer)<br/>
+        CategoryId -> category_id (integer)
+        </code>
+        </pre>
+            <b>1. page => integer</b><br/>
+            Page adalah halaman yang ingin di tampilkan, page dimulai dari halaman 1
+            <br/><br/>
+            <b>2. size => string</b><br/>
+            Size adalah panjang list data yang ingin di tampilkan, ketika size diisi dengan nilai 10 maka jumlah data pada list adalah 10
+            <br/><br/>
+            <b>3. category_id => integer</b><br/>
+        Jika ingin menampikan produk sesuai kategori, kirim <code>category_id</code> sesuai dengan kategori produk yang ingin ditampilkan, jika <code>category_id</code> tidak dikirim maka semua produk akan di tampilkan sesuai pagination.<br/><br/>
+        
+        endpoint <b>product</b> membutuhkan header Bearer token yang diperoleh saat <a href="http://ec2-3-94-76-231.compute-1.amazonaws.com/#/auth/Login">login</a> atau <a href="http://ec2-3-94-76-231.compute-1.amazonaws.com/#/auth/Register">register</a></p>
       operationId: ListProduct
       security:
         - BearerAuth: []
@@ -401,7 +419,18 @@ paths:
 
       responses:
         "200":
-          description: Fetch Product Success
+          description: <font size=+1> response sukses terdiri dari struktur JSON yang berisi standar response <code>code</code>, <code>message</code>, dan <code>data</code>.<br/><br/>struktur pagination<br/>
+            <pre><code>Page  ->  page (integer)<br/>
+            Size  ->  size (integer)</br>
+            Items ->  items (array of product)</code></pre><br/>
+            <b>1. page => integer</b><br/>
+            mengembalikan nilai <code>page</code> yang sama seperti nilai pada query paramater
+            <br/><br/>
+            <b>2. size => integer</b><br/>
+            mengembalikan nilai <code>size</code> yang sama seperti nilai pada query paramater
+            <br/><br/>
+            <b>3. items => array of product</b><br/>
+            Mengembalikan data product sesuai halaman yang diminta, jika data tidak ada maka yang dikembalikan adalah <code>empty/[]</code><br/>
           content:
             "application/json":
               schema:
@@ -428,7 +457,8 @@ paths:
                         items:
                           $ref: "#/components/schemas/Product"
         "500":
-          description: Login Failed
+          description: <font size=+1>Response gagal terdiri dari <code>code</code> dan <code>message</code><br/>
+            <code>code</code> mengikuti standar http code, <code>message</code> sesuai error yang terjadi.<br>
           content:
             application/json:
               schema:
@@ -447,6 +477,7 @@ paths:
     get:
       tags:
         - "product"
+      description: <font size=+1><p>Menampilkan produk spesifik sesuai dengan ID produk, membutuhkan parameter <code>id</code> diambil dari product id yang diperoleh dari endpoint <a href="http://ec2-3-94-76-231.compute-1.amazonaws.com/#/product/ListProduct">product</a></p>
       operationId: GetProductDetail
       security:
         - BearerAuth: []
@@ -461,7 +492,8 @@ paths:
 
       responses:
         "200":
-          description: Fetch Product Success
+          description: <font size=+1> Mengembalikan standar response JSON yang terdiri dari <code>code</code>, <code>message</code> dan <code>data</code>.
+            field <code>data</code> berisi data produk sesuai <code>id</code> params yang dikirim
           content:
             "application/json":
               schema:
@@ -478,7 +510,8 @@ paths:
                     $ref: "#/components/schemas/Product"
                           
         "500":
-          description: Login Failed
+          description: <font size=+1>Response gagal terdiri dari <code>code</code> dan <code>message</code><br/>
+            <code>code</code> mengikuti standar http code, <code>message</code> sesuai error yang terjadi.<br>
           content:
             application/json:
               schema:
