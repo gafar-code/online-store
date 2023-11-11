@@ -21,6 +21,6 @@ jobs:
         script: |
           cd online-store
           git pull -f
-          docker compose down
-          nohup docker compose up &> /dev/null &
+          sudo docker compose down
+          sudo nohup docker compose up &> /dev/null &
           exit
