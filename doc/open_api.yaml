@@ -1,8 +1,8 @@
 openapi: 3.0.0
 
 info:
-  title: Online Store
-  description: Documentation of the Online Store API build in Go-lang
+  title: API Online Store
+  description: <font size=+2> Sebuah server Aplikasi yang di bangun menggunakan bahasa pemograman Golang. dengan standar response yang baik dan dokumentasi yang mudah dipahami.
   version: 1.0.0
 
 servers:
@@ -195,6 +195,15 @@ components:
 paths:
   /auth/register:
     post:
+      description: <font size=+1><p>Registrasi menggunakan email dan password, email yang sudah terdaftar tidak dapat digunakan untuk registrasi. user wajib mengisi data diri yang terdiri dari nama, alamat tempat tinggal, email dan password. data dikirim dalam bentuk <b>JSON</b> melalui request body
+        <pre><code>Nama      -> name(string)<br/>
+        Alamat    -> address(string)<br/>
+        Email     -> email(string)<br/>
+        Password  -> password(string)
+        </code>
+        </pre>
+        jika registrasi berhasil akan mendapat <b>token credential</b> yang dapat digunakan untuk authentifikasi<br/>
+        simpanlah di database lokal untuk dapat di gunakan berulang</p>
       tags:
         - "auth"
       operationId: Register
@@ -223,7 +232,28 @@ paths:
                 - password
       responses:
         "201":
-          description: Register Success
+          description: <font size=+1>Saat registrasi berhasil akan mengembalikan data berbentuk JSON object memiliki beberapa properties. response JSON memiliki standar tetap yang terdiri dari <code>code</code>, <code>message</code>, <code>data</code><br/><br/>
+            <div>
+            <p>
+            <b>1. code => integer</b><br/>
+            mengembalikan http code standar, jika registrasi sukses Kode yang di kembalikan adalah <code>201</code>, jika error maka kode yang dikembalikan adalah <code>500</code>
+            </p>
+            </div>
+            <br/>
+            <div>
+            <p>
+            <b>2. message => string</b><br/>
+            Mengembalikan pesan dari server, jika Permintaan berhasil di prosess maka akan menampilkan pesan sukses, dan menampilkan pesan error ketika permintaan gagal di proses
+            </p>
+            </div>
+            <br/>
+            <div>
+            <p>
+            <b>3. data => UserObject</b><br/>
+            Mengembalikan data user yang terdiri dari <code>id</code>,<code>name</code>,<code>email</code>,<code>address</code>,<code>token</code>,<code>created_at</code>,
+            </p>
+            </div>
+            <br/>
           content:
             "application/json":
               schema:
@@ -239,7 +269,8 @@ paths:
                   data:
                     $ref: "#/components/schemas/Customer"
         "500":
-          description: Register Failed
+          description: <font size=+1>Response gagal terdiri dari <code>code</code> dan <code>message</code><br/>
+            <b>code</b> mengikuti standar http code, <b>message</b> sesuai error yang terjadi.<br>
           content:
             application/json:
               schema:
