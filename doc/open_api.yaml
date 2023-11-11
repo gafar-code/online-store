@@ -1,8 +1,8 @@
 openapi: 3.0.0
 
 info:
-  title: Online Store
-  description: Documentation of the Online Store API build in Go-lang
+  title: API Online Store
+  description: <font size=+2> Sebuah server Aplikasi yang di bangun menggunakan bahasa pemograman Golang. dengan standar response yang baik dan dokumentasi yang mudah dipahami.
   version: 1.0.0
 
 servers:
@@ -71,9 +71,6 @@ components:
       type: object
       properties:
         id:
-          type: integer
-          example: 1
-        customer_id:
           type: integer
           example: 1
         product_id:
@@ -195,6 +192,15 @@ components:
 paths:
   /auth/register:
     post:
+      description: <font size=+1><p>Registrasi menggunakan email dan password, email yang sudah terdaftar tidak dapat digunakan untuk registrasi. user wajib mengisi data diri yang terdiri dari nama, alamat tempat tinggal, email dan password. data dikirim dalam bentuk <b>JSON</b> melalui request body
+        <pre><code>Nama      -> name(string)<br/>
+        Alamat    -> address(string)<br/>
+        Email     -> email(string)<br/>
+        Password  -> password(string)
+        </code>
+        </pre>
+        jika registrasi berhasil akan mendapat <b>token credential</b> yang dapat digunakan untuk authentifikasi<br/>
+        simpanlah di database lokal untuk dapat di gunakan berulang</p>
       tags:
         - "auth"
       operationId: Register
@@ -223,7 +229,31 @@ paths:
                 - password
       responses:
         "201":
-          description: Register Success
+          description: <font size=+1>Saat registrasi berhasil akan mengembalikan data berbentuk JSON object memiliki beberapa properties. response JSON memiliki standar tetap yang terdiri dari <code>code</code>, <code>message</code>, <code>data</code>
+            <pre><code>Code    -> code (integer)<br>
+            Message -> message (String)</br>
+            Data    -> data (UserObject)</code></pre><br/>
+            <div>
+            <p>
+            <b>1. code</b><br/>
+            mengembalikan http code standar, jika registrasi sukses Kode yang di kembalikan adalah <code>201</code>, jika error maka kode yang dikembalikan adalah <code>500</code>
+            </p>
+            </div>
+            <br/>
+            <div>
+            <p>
+            <b>2. message</b><br/>
+            Mengembalikan pesan dari server, jika Permintaan berhasil di prosess maka akan menampilkan pesan sukses, dan menampilkan pesan error ketika permintaan gagal di proses
+            </p>
+            </div>
+            <br/>
+            <div>
+            <p>
+            <b>3. data</b><br/>
+            Mengembalikan data user yang terdiri dari <code>id</code>,<code>name</code>,<code>email</code>,<code>address</code>,<code>token</code>,<code>created_at</code>,
+            </p>
+            </div>
+            <br/>
           content:
             "application/json":
               schema:
@@ -239,7 +269,8 @@ paths:
                   data:
                     $ref: "#/components/schemas/Customer"
         "500":
-          description: Register Failed
+          description: <font size=+1>Response gagal terdiri dari <code>code</code> dan <code>message</code><br/>
+            <code>code</code> mengikuti standar http code, <code>message</code> sesuai error yang terjadi.<br>
           content:
             application/json:
               schema:
@@ -256,6 +287,15 @@ paths:
 
   /auth/login:
     post:
+      description: <font size=+1><p>Login menggunakan <b>email</b> dan <b>password</b> yang sudah terdaftar. data dikirim melalui method POST dengan request body JSON
+  
+        <pre><code>
+        Email     -> email(string)<br/>
+        Password  -> password(string)
+        </code>
+        </pre>
+        jika login berhasil akan mendapat <b>token credential</b> yang dapat digunakan untuk authentifikasi<br/>
+        simpanlah di database lokal untuk dapat di gunakan berulang</p>
       tags:
         - "auth"
       operationId: Login
@@ -278,7 +318,31 @@ paths:
                 - password
       responses:
         "200":
-          description: Login Success
+          description: <font size=+1>Saat registrasi berhasil akan mengembalikan data berbentuk JSON object memiliki beberapa properties. response JSON memiliki standar tetap yang terdiri dari <code>code</code>, <code>message</code>, <code>data</code>
+            <div>
+            <pre><code> Code    -> code (integer)<br>
+            Message -> message (String)</br>
+            Data    -> data (UserObject)</code></pre><br/>
+            <p>
+            <b>1. code</b><br/>
+            mengembalikan http code standar, jika registrasi sukses Kode yang di kembalikan adalah <code>201</code>, jika error maka kode yang dikembalikan adalah <code>500</code>
+            </p>
+            </div>
+            <br/>
+            <div>
+            <p>
+            <b>2. message</b><br/>
+            Mengembalikan pesan dari server, jika Permintaan berhasil di prosess maka akan menampilkan pesan sukses, dan menampilkan pesan error ketika permintaan gagal di proses
+            </p>
+            </div>
+            <br/>
+            <div>
+            <p>
+            <b>3. data</b><br/>
+            Mengembalikan data user yang terdiri dari <code>id</code>,<code>name</code>,<code>email</code>,<code>address</code>,<code>token</code>,<code>created_at</code>,
+            </p>
+            </div>
+            <br/>
           content:
             "application/json":
               schema:
@@ -294,7 +358,8 @@ paths:
                   data:
                     $ref: "#/components/schemas/Customer"
         "500":
-          description: Login Failed
+          description: <font size=+1>Response gagal terdiri dari <code>code</code> dan <code>message</code><br/>
+            <code>code</code> mengikuti standar http code, <code>message</code> sesuai error yang terjadi.<br>
           content:
             application/json:
               schema:
@@ -313,6 +378,24 @@ paths:
     get:
       tags:
         - "product"
+      description: <font size=+1><p>Menampilkan seluruh data produk yang tersedia. menerapkan pagination dalam pengambilan data, wajib mengirim parameter <code>page</code>, <code>size</code> dan opsional <code>category_id</code>
+  
+        <pre><code>
+        Page       -> page (integer)<br/>
+        Size       -> size (integer)<br/>
+        CategoryId -> category_id (integer)
+        </code>
+        </pre>
+            <b>1. page</b><br/>
+            Page adalah halaman yang ingin di tampilkan, page dimulai dari halaman 1
+            <br/><br/>
+            <b>2. size</b><br/>
+            Size adalah panjang list data yang ingin di tampilkan, ketika size diisi dengan nilai 10 maka jumlah data pada list adalah 10
+            <br/><br/>
+            <b>3. category_id</b><br/>
+        Jika ingin menampikan produk sesuai kategori, kirim <code>category_id</code> sesuai dengan kategori produk yang ingin ditampilkan, jika <code>category_id</code> tidak dikirim maka semua produk akan di tampilkan sesuai pagination.<br/><br/>
+        
+        endpoint <b>product</b> membutuhkan header Bearer token yang diperoleh saat <a href="http://ec2-3-94-76-231.compute-1.amazonaws.com/#/auth/Login">login</a> atau <a href="http://ec2-3-94-76-231.compute-1.amazonaws.com/#/auth/Register">register</a></p>
       operationId: ListProduct
       security:
         - BearerAuth: []
@@ -339,7 +422,18 @@ paths:
 
       responses:
         "200":
-          description: Fetch Product Success
+          description: <font size=+1> response sukses terdiri dari struktur JSON yang berisi standar response <code>code</code>, <code>message</code>, dan <code>data</code>.<br/><br/>struktur pagination<br/>
+            <pre><code>Page  ->  page (integer)<br/>
+            Size  ->  size (integer)</br>
+            Items ->  items (array of product)</code></pre><br/>
+            <b>1. page</b><br/>
+            mengembalikan nilai <code>page</code> yang sama seperti nilai pada query paramater
+            <br/><br/>
+            <b>2. size</b><br/>
+            mengembalikan nilai <code>size</code> yang sama seperti nilai pada query paramater
+            <br/><br/>
+            <b>3. items</b><br/>
+            Mengembalikan data product sesuai halaman yang diminta, jika data tidak ada maka yang dikembalikan adalah <code>empty/[]</code><br/>
           content:
             "application/json":
               schema:
@@ -366,7 +460,8 @@ paths:
                         items:
                           $ref: "#/components/schemas/Product"
         "500":
-          description: Login Failed
+          description: <font size=+1>Response gagal terdiri dari <code>code</code> dan <code>message</code><br/>
+            <code>code</code> mengikuti standar http code, <code>message</code> sesuai error yang terjadi.<br>
           content:
             application/json:
               schema:
@@ -385,6 +480,7 @@ paths:
     get:
       tags:
         - "product"
+      description: <font size=+1><p>Menampilkan produk spesifik sesuai dengan ID produk, membutuhkan parameter <code>id</code> diambil dari product id yang diperoleh dari endpoint <a href="http://ec2-3-94-76-231.compute-1.amazonaws.com/#/product/ListProduct">product</a></p>
       operationId: GetProductDetail
       security:
         - BearerAuth: []
@@ -399,7 +495,8 @@ paths:
 
       responses:
         "200":
-          description: Fetch Product Success
+          description: <font size=+1> Mengembalikan standar response JSON yang terdiri dari <code>code</code>, <code>message</code> dan <code>data</code>.
+            field <code>data</code> berisi data produk sesuai <code>id</code> params yang dikirim
           content:
             "application/json":
               schema:
@@ -416,7 +513,8 @@ paths:
                     $ref: "#/components/schemas/Product"
                           
         "500":
-          description: Login Failed
+          description: <font size=+1>Response gagal terdiri dari <code>code</code> dan <code>message</code><br/>
+            <code>code</code> mengikuti standar http code, <code>message</code> sesuai error yang terjadi.<br>
           content:
             application/json:
               schema:
@@ -435,6 +533,8 @@ paths:
     post:
       tags:
         - "cart"
+      description: <font size=+1>Menambahkan produk kedalam keranjang belanja, membutuhkan request body JSON<br/>
+        <code>product_id</code> integer yang dapat diperoleh dari endpoint <a href="http://ec2-3-94-76-231.compute-1.amazonaws.com/#/product/GetProductDetail">Detail Product</a><br/><br/>membutuhkan <code>token</code> authentifikasi yang diperoleh saat <a href="http://ec2-3-94-76-231.compute-1.amazonaws.com/#/auth/Login">login</a> atau <a href="http://ec2-3-94-76-231.compute-1.amazonaws.com/#/auth/Register">register</a>
       operationId: AddToCart
       security:
         - BearerAuth: []
@@ -449,7 +549,18 @@ paths:
                   example: 10
       responses:
         "201":
-          description: Add Product to Shopping Cart Success
+          description: <font size=+1><p>mengembalikan standar response yang terdiri dari <code>code</code>, <code>message</code> dan <code>data</code><br/>
+           data berisi JSON object
+           <pre><code>ID         -> id (integer)<br/>
+           ProductID  -> product_id (integer)<br/>
+           Qty        -> qty (integer)</code></pre></p><br/>
+           <b>1. id</b><br/>
+           id dari item cart yang berhasil dibuat<br><br>
+           <b>2. product_id</b><br>
+           id dari product yang telah berhasil ditambahkan kedalam keranjang belanja<br><br>
+           <b>3. qty</b><br>
+           jumlah produk yang telah ditambahkan kedalam keranjang belanja.<br>
+           menambahkan produk yang sudah ada didalam keranjang belanja akan secara otomatis menaikan <code>qty</code>
           content:
             "application/json":
               schema:
@@ -465,7 +576,8 @@ paths:
                   data:
                     $ref: "#/components/schemas/Cart"
         "500":
-          description: Login Failed
+          description: <font size=+1>Response gagal terdiri dari <code>code</code> dan <code>message</code><br/>
+            <code>code</code> mengikuti standar http code, <code>message</code> sesuai error yang terjadi.<br>
           content:
             application/json:
               schema:
@@ -481,6 +593,16 @@ paths:
     get:
       tags:
         - "cart"
+      description: <font size=+1>Menampilkan data product yang telah ditambahkan kedalam keranjang belanja sesuai halaman <b>Pagination</b><br>
+        Membutuhkan <code>token</code> header yang diperoleh saat <a href="http://ec2-3-94-76-231.compute-1.amazonaws.com/#/auth/Login">login</a> atau <a href="http://ec2-3-94-76-231.compute-1.amazonaws.com/#/auth/Register">register</a>.<br>
+        paramater yang dibutuhkan<br>
+        <pre><code>Page -> page (integer)<br>
+        Size -> size (integer)</code></pre><br>
+        <b>1. page</b><br/>
+        Page adalah halaman yang ingin di tampilkan, page dimulai dari halaman 1
+        <br/><br/>
+        <b>2. size</b><br/>
+        Size adalah panjang list data yang ingin di tampilkan, ketika size diisi dengan nilai 10 maka jumlah data pada list adalah 10
       operationId: GetCart
       security:
         - BearerAuth: []
@@ -501,7 +623,33 @@ paths:
             example: 10 
       responses:
         "200":
-          description: Get Shopping Cart
+          description: <font size=+1>Mengembalikan standar response <code>code</code>,  <code>message</code> dan <code>data</code>.<br>
+           didalam  <code>data</code> berisi Pagination dari item keranjang belanja.<br><br>
+           <b>CartObject</b>
+           <pre><code>ID         -> id (integer)<br>
+           CategoryID -> category_id (integer)<br>
+           Name       -> name (string)<br>
+           ImageUrl   -> image_url (string)<br>
+           Description-> description (string)<br>
+           Price      -> price (integer)<br>
+           Qty        -> qty (string)<br>
+           CreatedAt  -> created_at (date-time)</code></pre><br>
+           <b>1. ID</b><br>
+           id dari item cart<br><br>
+           <b>2. CategoryID</b><br>
+           <code>category_id</code> adalah kategori dari produk item cart<br><br>
+           <b>3. Name</b><br>
+           <code>name</code> adalah nama dari produk item cart<br><br>
+           <b>4. ImageUrl</b><br>
+           <code>image_url</code> adalah alamat url atau link gambar dari produk item cart<br><br>
+           <b>5. Description</b><br>
+           <code>description</code> adalah deskripsi dari produk item cart<br><br>
+           <b>6. Price</b><br>
+           <code>price</code> adalah harga per unit dari produk item cart<br><br>
+           <b>7. Qty</b><br>
+           <code>qty</code> adalah kuantitas produk yang telah ditambahkan kedalam keranjang belanja dari produk item cart<br><br>
+           <b>8. CreatedAt</b><br>
+           <code>created_at</code> adalah waktu saat produk ditambahkan kedalam keranjang belanja, <code>created_at</code> di generate secara otomatis<br><br>
           content:
             "application/json":
               schema:
@@ -529,7 +677,8 @@ paths:
                           $ref: "#/components/schemas/Product"
                     
         "500":
-          description: Login Failed
+          description: <font size=+1>Response gagal terdiri dari <code>code</code> dan <code>message</code><br/>
+            <code>code</code> mengikuti standar http code, <code>message</code> sesuai error yang terjadi.<br>
           content:
             application/json:
               schema:
@@ -545,6 +694,7 @@ paths:
     delete:
       tags:
         - "cart"
+      description: <font size=+1>Mengurangi <code>qty</code> Item keranjang belanja berdasarkan <code>product_id</code>.<br> membutuhkan query parameter <code>product_id</code> untuk menentukan produk mana yang ingin di kurangi. jika produk yang dituju memiliki <code>qty = 1</code> maka produk di hapus dari Keranjang belanja
       operationId: DeleteProductFromCart
       security:
         - BearerAuth: []
@@ -558,7 +708,7 @@ paths:
 
       responses:
         "204":
-          description: Delete Cart Succes
+          description: <font size=+1>Mengembalikan <code>http code 204</code> dan <code>message</code> sesuai response, tidak mengembalikan data
           content:
             "application/json":
               schema:
@@ -572,7 +722,8 @@ paths:
                     type: string
                     example: "Delete Cart Succesfully"
         "500":
-          description: Delete Cart Succes Failed
+          description: <font size=+1>Response gagal terdiri dari <code>code</code> dan <code>message</code><br/>
+            <code>code</code> mengikuti standar http code, <code>message</code> sesuai error yang terjadi.<br>
           content:
             application/json:
               schema:
@@ -591,6 +742,7 @@ paths:
     delete:
       tags:
         - "cart"
+      description: <font size=+1>Menghapus beberapa item sekaligus berdasarkan <code>product_id</code>. membutuhkan query parameter <code>product_ids</code> yang dengan format array of integer
       operationId: BulkDeleteCart
       security:
         - BearerAuth: []
@@ -605,7 +757,7 @@ paths:
               example: 1
       responses:
         "204":
-          description: Delete All Cart Succes
+          description: <font size=+1>Mengembalikan <code>http code 204</code> dan <code>message</code> sesuai response, tidak mengembalikan data
           content:
             "application/json":
               schema:
@@ -619,7 +771,8 @@ paths:
                     type: string
                     example: "Delete All Cart Succesfully"
         "500":
-          description: Delete All Cart Failed
+          description: <font size=+1>Response gagal terdiri dari <code>code</code> dan <code>message</code><br/>
+            <code>code</code> mengikuti standar http code, <code>message</code> sesuai error yang terjadi.<br>
           content:
             application/json:
               schema:
@@ -638,6 +791,18 @@ paths:
     post:
       tags:
         - "order"
+      description: <font size=+1>Menambahkan data order. saat customer melakukan checkout data akan disimpan pada table order hingga customer melakukan pembayaran. membutuhkan request body <b>JSON</b>
+        <pre><code>VirtualAccountID -> virtual_account_id (integer) <br>
+        Amount           -> amount (integer) <br>
+        Products         -> products (array of object)
+        </code>
+       </pre><br/>
+       <b>1. VirtualAccountID</b><br>
+       sebelum melakukan checkout user harus memilih metode pembayaran terlebih dahulu, <code>virtual_account_id</code> adalah id dari metode pembayaran yang di telah pilih dari endpoint <a href="http://ec2-3-94-76-231.compute-1.amazonaws.com/#/virtual-account/ListVirtualAccount">Virtual Account</a><br><br>
+       <b>2. Amount</b><br>
+       total tagihan yang harus di bayar<br><br>
+       <b>3. Products</b><br>
+       list data produk yang telah dipilih, terdiri dari <code>product_id</code>, <code>product_price</code> dan <code>qty</code><br> <code>product_id</code> adalah id produk, <code>product_price</code> adalah harga produk dan <code>qty</code> adalah jumlah barang yang di checkout<br><br>
       operationId: AddOrder
       security:
         - BearerAuth: []
@@ -673,7 +838,37 @@ paths:
                 - virtual_account_id
       responses:
         "201":
-          description: Checkout Success
+          description: <font size=+1>Mengembalikan Standar response yang terdiri dari <code>code</code>, <code>message</code> dan <code>data</code>.<br><br>
+            <b>Order Object</b>
+            <pre><code>ID             -> id (integer)<br>
+            BankName       -> bank_name (integer)<br>
+            RekeningNumber -> rekening_number (integer)<br>
+            Amount         -> amount (integer)<br>
+            Description    -> description (string)<br>
+            Status         -> status (string)<br>
+            IssuedAt       -> issued_at (date-time)<br>
+            ExpiredAt      -> expired_at (date-time)<br>
+            CreatedAt      -> created_at (date-time)</pre></code><br>
+            <b>1. ID</b><br>
+            <code>id</code> item order yang berhasil dibuat<br><br>
+            <b>2. BankName</b><br>
+            <code>bank_name</code> nama bank dari metode pembayaran yang dipilih<br><br>          
+            <b>3. RekeningNumber</b><br>
+            <code>rekening_number</code> rekening bank dari metode pembayaran yang dipilih<br><br> 
+            <b>4. Amount</b><br>
+            <code>amount</code> nominal pembayaran<br><br>
+            <b>5. Description</b><br>
+            <code>description</code>tutorial pembayaran dari metode pembayaran yang dipilih<br><br>
+            <b>6. Status</b><br>
+            <code>status</code>status pembayaran, status akan berubah setelah hit endpoint <a href="http://ec2-3-94-76-231.compute-1.amazonaws.com/#/order/AddProofPayment">Order Proof</a><br><br>
+            <b>7. Description</b><br>
+            <code>description</code>tutorial pembayaran dari metode pembayaran yang dipilih<br><br>
+            <b>8. IssuedAt</b><br>
+            <code>issued_at</code>waktu checkout<br><br>
+            <b>9. ExpiredAt</b><br>
+            <code>expired_at</code>ketika order telah melewati batas waktu expired, order akan dibatalkan oleh sistem<br><br>
+            <b>10. CreatedAt</b><br>
+            <code>created_at</code>waktu data di buat<br><br>
           content:
             "application/json":
               schema:
@@ -691,7 +886,8 @@ paths:
 
                      
         "500":
-          description: Checkout Failed
+          description: <font size=+1>Response gagal terdiri dari <code>code</code> dan <code>message</code><br/>
+            <code>code</code> mengikuti standar http code, <code>message</code> sesuai error yang terjadi.<br>
           content:
             application/json:
               schema:
@@ -710,6 +906,21 @@ paths:
       post:
         tags:
           - "order"
+        description: <font size=+1>Unggah bukti transfer, user dapat mengunggah bukti transfer dan data rekening untuk kemudian di lakukan validasi oleh admin.<br>
+          data di unggah melalui request body dengan format <code>multipart/form-data</code> dengan beberapa properti.<br>
+          <pre><code>OrderID        -> order_id (integer)<br>
+          Name           -> name (string)<br>
+          RekeningNumber -> rekening_number (integer)<br>
+          Image          -> image (string$binary)
+          </code></pre><br><br>
+          <b>1. OrderID</b><br>
+          <code>order_id</code>adalah id dari item order<br><br>
+          <b>2. Name</b><br>
+          <code>name</code>nama pemilik rekening pengirim<br><br> 
+          <b>3. RekeningNumber</b><br>
+          <code>rekening_number</code>nomor rekening pengirim<br><br>
+          <b>4. Image</b><br>
+          <code>image</code>foto bukti transfer<br><br>
         operationId: AddProofPayment
         security:
           - BearerAuth: []
@@ -739,7 +950,8 @@ paths:
 
         responses:
           "200":
-            description: Submit Success
+            description: <font size=+1>Mengembalikan standar response <code>code</code>, <code>message</code> dan <code>data</code>.<br>
+              <code>data</code> berisi order object, setelah submit status <b>WAITING_PAYMENT</b> akan menjadi <b>PENDING</b>
             content:
               "application/json":
                 schema:
@@ -757,7 +969,8 @@ paths:
 
                       
           "500":
-            description: Checkout Failed
+            description: <font size=+1>Response gagal terdiri dari <code>code</code> dan <code>message</code><br/>
+              <code>code</code> mengikuti standar http code, <code>message</code> sesuai error yang terjadi.<br>
             content:
               application/json:
                 schema:
@@ -773,6 +986,7 @@ paths:
       put:
         tags:
           - "order"
+        description: <font size=+1>Konfirmasi pembayaran berdasarkan <code>order_id</code>, membutuhkan query parameter <code>order_id</code> dan <code>approve</code>. berikan nilai false pada <code>approve</code> jika bukti tidak valid, dan true jika valid.
         operationId: UpdateOrderProof
         security:
           - BearerAuth: []
@@ -783,10 +997,16 @@ paths:
             schema:
               type: integer
               example: 1
+          - in: query
+            name: approve
+            required: true
+            schema:
+              type: boolean
+              example: true
 
         responses:
           "200":
-            description: Submit Success
+            description: <font size=+1>Mengembalikan <code>http code 200</code> dan <code>message</code> sesuai response, tidak mengembalikan data
             content:
               "application/json":
                 schema:
@@ -801,7 +1021,8 @@ paths:
                       example: "Submit Success"
                       
           "500":
-            description: Checkout Failed
+            description: <font size=+1>Response gagal terdiri dari <code>code</code> dan <code>message</code><br/>
+              <code>code</code> mengikuti standar http code, <code>message</code> sesuai error yang terjadi.<br>
             content:
               application/json:
                 schema:
@@ -815,11 +1036,72 @@ paths:
                       type: string
                       example: "Checkout Failed" 
 
+  /virtual-account:
+    get:
+      tags:
+        - "virtual-account"
+      description: <font size=+1>Menampilkan seluruh data Virtual account. virtual account di gunakan pada saat pembayaran. membutuhkan <code>token</code> Header.
+      operationId: ListVirtualAccount
+      security:
+        - BearerAuth: []
+
+      responses:
+        "200":
+          description: <font size=+1>Mengembalikan standar response <code>code</code>, <code>message</code> dan <code>data</code>. data berisi list virtual account.<br><br>
+            <b>VirtualAccountObject</b>
+            <pre><code>ID             -> id (string)<br>
+            Name           -> name (string)<br>
+            RekeningNumber -> rekening_number (integer)<br>
+            Description    -> description (date-time)<br>
+            CreatedAt      -> created_at (date-time)</code></pre><br>
+            <b>1. ID</b><br>
+            <code>id</code>adalah id virtual account<br><br>
+            <b>2. Name</b><br>
+            <code>name</code> Nama bank virtual account<br><br>
+            <b>3. RekeningNumber</b><br>
+            <code>rekening_number</code> nomor virtual account<br><br>
+            <b>5. CreatedAt</b><br>
+            <code>created_at</code> waktu virtual account di buat<br><br>
+            <b>6. Description</b><br>
+            <code>description</code>Tutorial cara transfer<br><br>
+            
+          content:
+            "application/json":
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 200
+                  message:
+                    type: string
+                    example: "Fetch VirtualAccount Success"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/VirtualAccount"
+        "500":
+          description: <font size=+1>Response gagal terdiri dari <code>code</code> dan <code>message</code><br/>
+              <code>code</code> mengikuti standar http code, <code>message</code> sesuai error yang terjadi.<br>
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 500
+                  message:
+                    type: string
+                    example: "Fetch Product Failed"
 
   /transaction:
     get:
       tags:
         - "transaction"
+      description: <font size=+1>Menampilkan seluruh transaksi berdasarkan User dan Pagination, membutuhkan <code>token</code>, query parameter <code>page</code> untuk menentukan halaman yang diambil dan <code>size</code> untuk menentukan berapa banyak data yang di ambil dalam 1 halaman
       operationId: ListTransaction
       security:
         - BearerAuth: []
@@ -841,7 +1123,26 @@ paths:
 
       responses:
         "200":
-          description: Fetch Order Success
+          description: <font size=+1>Mengembalikan standar response dengan <code>data</code> Pagination.<br><br>
+            <b>TransactionObject</b><br>
+            <pre><code>ID       -> id (string)<br>
+            Status   -> status (string)<br>
+            Amount   -> amount (integer)<br>
+            IssuedAt -> issued_at (date-time)<br>
+            CreatedAt-> created_at (date-time)<br>
+            Products -> products (array of product)</code></pre><br>
+            <b>1. ID</b><br>
+            <code>id</code> adalah id transaction<br><br>
+            <b>2. Status</b><br>
+            <code>status</code> status pesanan saat ini, enum status pesanan <b><i>ON_PROGRESS, IN_DELIVERY, DELIVERED, SUCCESS</i></b><br><br>
+            <b>3. Amount</b><br>
+            <code>amount</code> total harga pesanan<br><br>
+            <b>4. IssuedAt</b><br>
+            <code>issued_at</code> waktu pembayaran selesai<br><br>
+            <b>5. CreatedAt</b><br>
+            <code>created_at</code> waktu pesanan di acc oleh admin<br><br>
+            <b>6. Products</b><br>
+            <code>products</code> List product yang ada pada transaksi<br><br>
           content:
             "application/json":
               schema:
@@ -868,7 +1169,8 @@ paths:
                         items:
                           $ref: "#/components/schemas/Transaction"
         "500":
-          description: Login Failed
+          description: <font size=+1>Response gagal terdiri dari <code>code</code> dan <code>message</code><br/>
+              <code>code</code> mengikuti standar http code, <code>message</code> sesuai error yang terjadi.<br>
           content:
             application/json:
               schema:
@@ -882,45 +1184,3 @@ paths:
                     type: string
                     example: "Fetch Product Failed"
 
-
-  /virtual-account:
-    get:
-      tags:
-        - "virtual-account"
-      operationId: ListVirtualAccount
-      security:
-        - BearerAuth: []
-
-      responses:
-        "200":
-          description: Fetch VirtualAccount Success
-          content:
-            "application/json":
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                    format: int32
-                    example: 200
-                  message:
-                    type: string
-                    example: "Fetch VirtualAccount Success"
-                  data:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/VirtualAccount"
-        "500":
-          description: Login Failed
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                    format: int32
-                    example: 500
-                  message:
-                    type: string
-                    example: "Fetch Product Failed"

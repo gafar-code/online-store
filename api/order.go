@@ -45,7 +45,8 @@ type orderProofReq struct {
 }
 
 type updateOrderProofReq struct {
-	OrderID int64 `form:"order_id"`
+	OrderID int64 `form:"order_id" binding:"required"`
+	Approve bool  `form:"approve" binding:"required"`
 }
 
 type orderProofRes struct {
@@ -300,9 +301,17 @@ func (server *Server) UpdateOrderProof(c *gin.Context, params UpdateOrderProofPa
 		return
 	}
 
+	var status string
+
+	if req.Approve {
+		status = "PAID"
+	} else {
+		status = "DECLINED"
+	}
+
 	arg := db.UpdateOrderParams{
 		ID:     req.OrderID,
-		Status: "PAID",
+		Status: status,
 	}
 
 	order, err := server.q.UpdateOrder(c, arg)
@@ -314,20 +323,22 @@ func (server *Server) UpdateOrderProof(c *gin.Context, params UpdateOrderProofPa
 		return
 	}
 
-	trxArg := db.CreateTransactionParams{
-		CustomerID: order.CustomerID,
-		Status:     "ON_PROGRESS",
-		IssuedAt:   order.IssuedAt,
-		OrderID:    req.OrderID,
-	}
+	if req.Approve {
+		trxArg := db.CreateTransactionParams{
+			CustomerID: order.CustomerID,
+			Status:     "ON_PROGRESS",
+			IssuedAt:   order.IssuedAt,
+			OrderID:    req.OrderID,
+		}
 
-	_, err = server.q.CreateTransaction(c, trxArg)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, Response{
-			Code:    http.StatusInternalServerError,
-			Message: err.Error(),
-		})
-		return
+		_, err = server.q.CreateTransaction(c, trxArg)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, Response{
+				Code:    http.StatusInternalServerError,
+				Message: err.Error(),
+			})
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, Response{
