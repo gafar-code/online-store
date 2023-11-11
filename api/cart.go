@@ -14,6 +14,13 @@ type addCartReq struct {
 	ProductID int64 `json:"product_id" binding:"required"`
 }
 
+type addCartRes struct {
+	ID        int64     `json:"id"`
+	ProductID int64     `json:"product_id"`
+	Qty       int64     `json:"qty"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
 type deleteCartReq struct {
 	ProductID int64 `form:"product_id" binding:"required"`
 }
@@ -108,7 +115,12 @@ func (server *Server) AddToCart(c *gin.Context) {
 		c.JSON(http.StatusCreated, ResponseData{
 			Code:    http.StatusCreated,
 			Message: "Success",
-			Data:    cart,
+			Data: addCartRes{
+				ID:        cart.ID,
+				ProductID: cart.ProductID,
+				Qty:       cart.Qty,
+				CreatedAt: cart.CreatedAt,
+			},
 		})
 		return
 	}
