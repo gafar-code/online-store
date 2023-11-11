@@ -6,7 +6,7 @@ info:
   version: 1.0.0
 
 servers:
-  - url: http://ec2-3-94-76-231.compute-1.amazonaws.com:8080/api/v1/
+  - url: 3.94.76.231:80/api/v1/
 
 components:
   securitySchemes:
